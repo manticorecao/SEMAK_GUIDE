@@ -25,8 +25,8 @@
       //set sidebar display level
       sidebarDisplayLevel: 1,
       toc: {
-    	tocMaxLevel: 5,
-    	target: 'h2, h3, h4, h5, h6'
+    	tocMaxLevel: 6,
+    	target: 'h1, h2, h3, h4, h5, h6'
   	  },
   	  count:{
     	countable: true,
@@ -41,7 +41,21 @@
     	  minute: ""
     	},
     	isExpected: true
-  	  }
+  	  },
+  	  copyCode: {
+    	buttonText : '复制',
+    	errorText  : '错误',
+    	successText: '已复制'
+  	  },
+  	  search: {
+  	  	//过期时间，单位毫秒，默认一天
+      	maxAge: 86400000,
+      	paths: 'auto',
+      	placeholder: '键入搜索关键字',
+      	noData: '没有可以显示的结果',
+      	//搜索标题的最大程级, 1 - 6
+      	depth: 6
+      }
     }
   </script>
   <!-- Docsify v4 -->
@@ -50,6 +64,16 @@
   <script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
   <script src="//unpkg.com/docsify-plugin-toc"></script>
   <script src="//unpkg.com/docsify-count/dist/countable.min.js"></script>
+  <script src="//unpkg.com/docsify-copy-code@2"></script>
+  <script src="//unpkg.com/docsify/lib/plugins/search.js"></script>
+  
+  <script src=".prism/prism-bash.min.js"></script>
+  <script src=".prism/prism-java.min.js"></script>
+  <script src=".prism/prism-javascript.min.js"></script>
+  <script src=".prism/prism-json.min.js"></script>
+  <script src=".prism/prism-properties.min.js"></script>
+  <script src=".prism/prism-yaml.min.js"></script>
+
 
 </body>
 </html>
