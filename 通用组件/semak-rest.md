@@ -1,4 +1,4 @@
-`semak-rest` 组件是一款基于Spring Rest构建的组件。除了支持最基本的RESTful风格服务之外，通过整合SpringCloud和SpringCloud Alibaba，将 `semak-rest` 组件纳入到一个更大的服务治理生态圈之内，大幅提高其应用价值。通过整合一系列的功能，组件提供了如下的一些特性：
+`rsemak-rest` 组件是一款基于Spring Rest构建的组件。除了支持最基本的RESTful风格服务之外，通过整合SpringCloud和SpringCloud Alibaba，将 `semak-rest` 组件纳入到一个更大的服务治理生态圈之内，大幅提高其应用价值。通过整合一系列的功能，组件提供了如下的一些特性：
 
 
 **服务端功能：**
