@@ -1,6 +1,6 @@
 ---
 typora-root-url: .assets
-typora-copy-images-to: ../.assets
+typora-copy-images-to: ../assets
 ---
 
 # semak-mybatis
@@ -321,10 +321,9 @@ mvn clean mybatis-generator:generate
 
 ### 2.4. 生成文件使用方式
 
-
 通过执行mbg的生成命令后，我们可以看到的生成文件的目录结构大致如下：
 
-![image-20210901133837550](/../../.assets/image-20210901133837550.png)
+![image-20210901144853643](/../../assets/image-20210901144853643.png)
 
 
 - `dal`包下的dao接口文件：拷贝到对应的dal层，作为数据访问接口使用，其继承了预定义的CRUD接口，可以直接使用预定义操作。
