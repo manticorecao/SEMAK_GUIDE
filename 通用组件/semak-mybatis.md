@@ -323,7 +323,7 @@ mvn clean mybatis-generator:generate
 
 通过执行mbg的生成命令后，我们可以看到的生成文件的目录结构大致如下：
 
-<img src="/../../SEMAK_GUIDE/image-20210901144853643.png" alt="image-20210901144853643" style="zoom:80%;" />
+<img src="../SEMAK_GUIDE/image-20210901144853643.png" alt="image-20210901144853643" style="zoom:80%;" />
 
 
 - `dal`包下的dao接口文件：拷贝到对应的dal层，作为数据访问接口使用，其继承了预定义的CRUD接口，可以直接使用预定义操作。
