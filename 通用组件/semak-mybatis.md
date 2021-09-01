@@ -1,3 +1,8 @@
+---
+typora-root-url: .assets
+typora-copy-images-to: ../.assets
+---
+
 # semak-mybatis
 
 `semak-mybatis`组件是一款基于ORM框架MyBatis的组件，其特性主要包括：
@@ -319,7 +324,7 @@ mvn clean mybatis-generator:generate
 
 通过执行mbg的生成命令后，我们可以看到的生成文件的目录结构大致如下：
 
-<img src=".assets/1590744530812-99ea9bdc-82d0-48ff-848d-fe3917fc8c9a-20210901103347386.jpeg" style="zoom:75%;" />
+![image-20210901133837550](/../../.assets/image-20210901133837550.png)
 
 
 - `dal`包下的dao接口文件：拷贝到对应的dal层，作为数据访问接口使用，其继承了预定义的CRUD接口，可以直接使用预定义操作。
