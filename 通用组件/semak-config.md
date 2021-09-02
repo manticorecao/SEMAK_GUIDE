@@ -1,3 +1,5 @@
+# semak-config
+
 `semak-config`组件是一款基于Alibaba Nacos的分布式动态配置服务客户端组件。
 
 
@@ -36,13 +38,14 @@
 ```
 
 
+
 ## 3. 创建外化配置
 
 
 进入Nacos的控制页面，在配置列表功能页面中，点击右上角的“+”按钮，进入“新建配置”页面，如下图填写内容：
 
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1592357065427-e8088a55-a985-4d56-b77c-848425261391.png#align=left&display=inline&height=793&margin=%5Bobject%20Object%5D&name=image.png&originHeight=805&originWidth=1672&size=71748&status=done&style=none&width=1648)
+![image.png](.assets/1592357065427-e8088a55-a985-4d56-b77c-848425261391.png)
 
 
 其中：
@@ -65,8 +68,6 @@
 1. 环境部分：`dev`，对应应用的`${spring.profiles.active}`，对应JVM的`-Dspring.profiles.active=xxx`同样有效。
 1. 后缀部分：`yaml`，文件格式。
 
-
-
 Nacos Config 在加载配置的时候，不仅仅加载了以 DataId 为 `${spring.application.name}.${file-extension:properties}` 为前缀的基础配置，还加载了DataId为 `${spring.application.name}-${profile}.${file-extension:properties}` 的基础配置。在日常开发中如果遇到多套环境下的不同配置，可以通过Spring 提供的 ${spring.profiles.active} 这个配置项来配置。
 
 
@@ -81,8 +82,6 @@ Nacos Config 在加载配置的时候，不仅仅加载了以 DataId 为 `${spri
 
 
 > 注意：这里必须使用`bootstrap.yaml`。同时，`${spring.application.name}-${spring.profiles.active}.yaml`值必须与Nacos中创建配置的`Data Id`匹配。
-
-
 
 ```yaml
 spring:
@@ -100,7 +99,9 @@ spring:
 ```
 
 
+
 ### 5.1. 完整的配置项信息
+
 | **配置项** | **Key** | **默认值** | **说明** |
 | :--- | :--- | :--- | :--- |
 | 服务端地址 | `spring.cloud.nacos.config.server-addr` |  | Nacos Server 启动监听的ip地址和端口 |
@@ -120,7 +121,7 @@ spring:
 | 共享配置动态刷新 | `spring.cloud.nacos.config.refreshableDataids` |  | 共享配置中需要动态刷新的 DataId, "," 分割 |
 | 自定义 Data Id 配置 | `spring.cloud.nacos.config.extConfig` |  | 属性是个集合，内部由 `Config` POJO 组成。`Config` 有 3 个属性，分别是 `dataId`, `group` 以及 `refresh` |
 
-## 
+
 ## 6. 应用配置
 
 
@@ -160,6 +161,7 @@ public class DemoController {
 使用`spring.profiles.active=dev`来启动应用。
 
 
+
 #### 第三步：验证配置
 
 
@@ -188,6 +190,7 @@ $ curl http://localhost:8080/test
 ```
 测试DEV
 ```
+
 
 
 #### 第四步：验证配置的动态刷新
@@ -234,6 +237,7 @@ $ curl http://localhost:8080/test
 ```
 测试DEV-修改
 ```
+
 
 
 ### 6.2. 对象类型属性
@@ -318,6 +322,7 @@ public class DemoController {
 使用`spring.profiles.active=dev`来启动应用。
 
 
+
 #### 第三步：验证配置
 
 
@@ -349,6 +354,7 @@ $ curl http://localhost:8080/contact
 ```json
 {"name":"曹斌DEV","phoneNo":"1361xxxxxxx","addr":"浦东新区沪南路xxxx"}
 ```
+
 
 
 #### 第四步：验证配置的动态刷新
@@ -400,6 +406,7 @@ $ curl http://localhost:8080/test
 ```
 
 
+
 ## 7. 配置回滚
 
 
@@ -409,17 +416,18 @@ $ curl http://localhost:8080/test
 1. 在 `配置管理` -> `配置列表` 中选择 Data Id为`semak-config-demo-dev.yaml`的配置项，在操作列点击`更多`，打开`历史版本`列表。
 
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1592357184452-92b8d448-eeab-4066-9e8c-c6f5b92c166f.png#align=left&display=inline&height=450&margin=%5Bobject%20Object%5D&name=image.png&originHeight=588&originWidth=2151&size=94724&status=done&style=none&width=1648)
+   ![image.png](.assets/1592357184452-92b8d448-eeab-4066-9e8c-c6f5b92c166f.png)
 
 2. 选择需要回滚的版本，点击`回滚`操作。
 
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1592357201134-eb4c32ff-d77e-4b3f-ae45-94147224664e.png#align=left&display=inline&height=350&margin=%5Bobject%20Object%5D&name=image.png&originHeight=484&originWidth=2282&size=82466&status=done&style=none&width=1648)
+   ![image.png](.assets/1592357201134-eb4c32ff-d77e-4b3f-ae45-94147224664e.png)
 
 3. 核对所有项后，点击`回滚配置`按钮，再次确认后，即可将配置回滚到当前版本。此时，应用接收到配置变更通知后，会立刻刷新配置值。
 
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1592357217493-01bc5630-668b-471e-9d9e-38b68670b615.png#align=left&display=inline&height=580&margin=%5Bobject%20Object%5D&name=image.png&originHeight=602&originWidth=1710&size=58163&status=done&style=none&width=1648)
+   ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1592357217493-01bc5630-668b-471e-9d9e-38b68670b615.png)
+
 
 
 ## 8. 扩展配置

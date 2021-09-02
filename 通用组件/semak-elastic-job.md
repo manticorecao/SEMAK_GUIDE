@@ -1,4 +1,6 @@
-> 已升级到3.0.0-RC1
+# semak-elastic-job
+
+> 已升级到3.0.0-RC1 - 当前文档不正确，需迭代
 
 `semak-elastic-job`组件是一款基于当当网Elastic-Job-Lite进行定制的去中心化的分布式调度组件，其主要特性包括：
 
