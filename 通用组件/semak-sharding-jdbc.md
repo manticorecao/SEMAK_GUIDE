@@ -1,3 +1,5 @@
+# semak-sharding-jdbc
+
 `semak-sharding-jdbc`组件在Java的JDBC层提供的额外功能。 它使用客户端直连数据库，无需额外部署和依赖，可理解为增强版的JDBC驱动，完全兼容JDBC和各种ORM框架。其特性主要包括：
 
 
@@ -30,6 +32,7 @@
     <version>最新RELEASE版本</version>
 </dependency>
 ```
+
 
 
 ## 2. 概念&功能
@@ -90,44 +93,42 @@
 
 - **逻辑表**
 
-水平拆分的数据库（表）的相同逻辑和数据结构表的总称。例：订单数据根据主键尾数拆分为10张表，分别是`t_order_0`到`t_order_9`，他们的逻辑表名为`t_order`。
+  水平拆分的数据库（表）的相同逻辑和数据结构表的总称。例：订单数据根据主键尾数拆分为10张表，分别是`t_order_0`到`t_order_9`，他们的逻辑表名为`t_order`。
+
 - **真实表**
 
-在分片的数据库中真实存在的物理表。即上个示例中的`t_order_0`到`t_order_9`。
+  在分片的数据库中真实存在的物理表。即上个示例中的`t_order_0`到`t_order_9`。
+
 - **数据节点**
 
-数据分片的最小单元。由数据源名称和数据表组成，例：`ds_0.t_order_0`。
+  数据分片的最小单元。由数据源名称和数据表组成，例：`ds_0.t_order_0`。
+
 - **绑定表**
 
-指分片规则一致的主表和子表。例如：`t_order`表和`t_order_item`表，均按照`order_id`分片，则此两张表互为绑定表关系。绑定表之间的多表关联查询不会出现笛卡尔积关联，关联查询效率将大大提升。举例说明，如果SQL为：
-```sql
-SELECT i.* FROM t_order o JOIN t_order_item i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
-```
-
-
-在不配置绑定表关系时，假设分片键`order_id`将数值10路由至第0片，将数值11路由至第1片，那么路由后的SQL应该为4条，它们呈现为笛卡尔积：
-```sql
-SELECT i.* FROM t_order_0 o JOIN t_order_item_0 i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
-SELECT i.* FROM t_order_0 o JOIN t_order_item_1 i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
-SELECT i.* FROM t_order_1 o JOIN t_order_item_0 i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
-SELECT i.* FROM t_order_1 o JOIN t_order_item_1 i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
-```
-
-
-在配置绑定表关系后，路由的SQL应该为2条：
-```sql
-SELECT i.* FROM t_order_0 o JOIN t_order_item_0 i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
-SELECT i.* FROM t_order_1 o JOIN t_order_item_1 i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
-```
-
-
-其中`t_order`在FROM的最左侧，组件将会以它作为整个绑定表的主表。 所有路由计算将会只使用主表的策略，那么`t_order_item`表的分片计算将会使用`t_order`的条件。故绑定表之间的分区键要完全相同。
+  指分片规则一致的主表和子表。例如：`t_order`表和`t_order_item`表，均按照`order_id`分片，则此两张表互为绑定表关系。绑定表之间的多表关联查询不会出现笛卡尔积关联，关联查询效率将大大提升。举例说明，如果SQL为：
+  ```sql
+  SELECT i.* FROM t_order o JOIN t_order_item i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
+  ```
+  在不配置绑定表关系时，假设分片键`order_id`将数值10路由至第0片，将数值11路由至第1片，那么路由后的SQL应该为4条，它们呈现为笛卡尔积：
+  ```sql
+  SELECT i.* FROM t_order_0 o JOIN t_order_item_0 i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
+  SELECT i.* FROM t_order_0 o JOIN t_order_item_1 i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
+  SELECT i.* FROM t_order_1 o JOIN t_order_item_0 i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
+  SELECT i.* FROM t_order_1 o JOIN t_order_item_1 i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
+  ```
+  在配置绑定表关系后，路由的SQL应该为2条：
+  ```sql
+  SELECT i.* FROM t_order_0 o JOIN t_order_item_0 i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
+  SELECT i.* FROM t_order_1 o JOIN t_order_item_1 i ON o.order_id=i.order_id WHERE o.order_id in (10, 11);
+  ```
+	其中`t_order`在FROM的最左侧，组件将会以它作为整个绑定表的主表。 所有路由计算将会只使用主表的策略，那么`t_order_item`表的分片计算将会使用`t_order`的条件。故绑定表之间的分区键要完全相同。
 - **广播表**
 
-指所有的分片数据源中都存在的表，表结构和表中的数据在每个数据库中均完全一致。适用于数据量不大且需要与海量数据的表进行关联查询的场景，例如：字典表。
+  指所有的分片数据源中都存在的表，表结构和表中的数据在每个数据库中均完全一致。适用于数据量不大且需要与海量数据的表进行关联查询的场景，例如：字典表。
+
 - **逻辑索引**
 
-某些数据库（如：PostgreSQL/Oracle）不允许同一个库存在名称相同索引，某些数据库（如：MySQL/SQLServer）则允许只要同一个表中不存在名称相同的索引即可。 逻辑索引用于同一个库不允许出现相同索引名称的分表场景，需要将同库不同表的索引名称改写为`索引名 + 表名`，改写之前的索引名称成为逻辑索引。
+  某些数据库（如：PostgreSQL/Oracle）不允许同一个库存在名称相同索引，某些数据库（如：MySQL/SQLServer）则允许只要同一个表中不存在名称相同的索引即可。 逻辑索引用于同一个库不允许出现相同索引名称的分表场景，需要将同库不同表的索引名称改写为`索引名 + 表名`，改写之前的索引名称成为逻辑索引。
 
 
 
@@ -136,36 +137,45 @@ SELECT i.* FROM t_order_1 o JOIN t_order_item_1 i ON o.order_id=i.order_id WHERE
 
 - **分片键**
 
-用于分片的数据库字段，是将数据库(表)水平拆分的关键字段。例：将订单表中的订单主键的尾数取模分片，则订单主键为分片字段。 SQL中如果无分片字段，将执行全路由，性能较差。 除了对单分片字段的支持，组件也支持根据多个字段进行分片。
+  用于分片的数据库字段，是将数据库(表)水平拆分的关键字段。例：将订单表中的订单主键的尾数取模分片，则订单主键为分片字段。 SQL中如果无分片字段，将执行全路由，性能较差。 除了对单分片字段的支持，组件也支持根据多个字段进行分片。
+
 - **分片算法**
 
-通过分片算法将数据分片，支持通过`=`、`BETWEEN`和`IN`分片。分片算法需要应用方开发者自行实现，可实现的灵活度非常高。
+  通过分片算法将数据分片，支持通过`=`、`BETWEEN`和`IN`分片。分片算法需要应用方开发者自行实现，可实现的灵活度非常高。
 
-目前组件提供3种分片算法。由于分片算法和业务实现紧密相关，因此，组件仅实现了取模的基本算法，更多的分片算法开发人员可以通过抽象的分片策略将各种场景提炼出来，自行实现。
+  目前组件提供3种分片算法。由于分片算法和业务实现紧密相关，因此，组件仅实现了取模的基本算法，更多的分片算法开发人员可以通过抽象的分片策略将各种场景提炼出来，自行实现。
+
    - 精确分片算法
 
-对应`PreciseShardingAlgorithm`，用于处理使用单一键作为分片键的`=`与`IN`进行分片的场景。需要配合`StandardShardingStrategy`使用。
+     对应`PreciseShardingAlgorithm`，用于处理使用单一键作为分片键的`=`与`IN`进行分片的场景。需要配合`StandardShardingStrategy`使用。
+
    - 范围分片算法
 
-对应`RangeShardingAlgorithm`，用于处理使用单一键作为分片键的`BETWEEN AND`进行分片的场景。需要配合`StandardShardingStrategy`使用。
+     对应`RangeShardingAlgorithm`，用于处理使用单一键作为分片键的`BETWEEN AND`进行分片的场景。需要配合`StandardShardingStrategy`使用。
+
    - 复合分片算法
 
-对应`ComplexKeysShardingAlgorithm`，用于处理使用多键作为分片键进行分片的场景，包含多个分片键的逻辑较复杂，需要应用开发者自行处理其中的复杂度。需要配合`ComplexShardingStrategy`使用。
+     对应`ComplexKeysShardingAlgorithm`，用于处理使用多键作为分片键进行分片的场景，包含多个分片键的逻辑较复杂，需要应用开发者自行处理其中的复杂度。需要配合`ComplexShardingStrategy`使用。
+
 - **分片策略**
 
-包含分片键和分片算法，由于分片算法的独立性，将其独立抽离。真正可用于分片操作的是**分片键** + **分片算法**，也就是**分片策略**。目前提供4种分片策略。
+  包含分片键和分片算法，由于分片算法的独立性，将其独立抽离。真正可用于分片操作的是**分片键** + **分片算法**，也就是**分片策略**。目前提供4种分片策略。
+
    - 标准分片策略
 
-对应`StandardShardingStrategy`。提供对SQL语句中的=, IN和BETWEEN AND的分片操作支持。`StandardShardingStrategy`只支持单分片键，提供`PreciseShardingAlgorithm`和`RangeShardingAlgorithm`两个分片算法。`PreciseShardingAlgorithm`是必选的，用于处理=和IN的分片。`RangeShardingAlgorithm`是可选的，用于处理`BETWEEN AND`分片，如果不配置`RangeShardingAlgorithm`，SQL中的`BETWEEN AND`将按照全库路由处理。
+     对应`StandardShardingStrategy`。提供对SQL语句中的=, IN和BETWEEN AND的分片操作支持。`StandardShardingStrategy`只支持单分片键，提供`PreciseShardingAlgorithm`和`RangeShardingAlgorithm`两个分片算法。`PreciseShardingAlgorithm`是必选的，用于处理=和IN的分片。`RangeShardingAlgorithm`是可选的，用于处理`BETWEEN AND`分片，如果不配置`RangeShardingAlgorithm`，SQL中的`BETWEEN AND`将按照全库路由处理。
+
    - 复合分片策略
 
-对应`ComplexShardingStrategy`。复合分片策略。提供对SQL语句中的`=`, `IN`和`BETWEEN AND`的分片操作支持。`ComplexShardingStrategy`支持多分片键，由于多分片键之间的关系复杂，因此并未进行过多的封装，而是直接将分片键值组合以及分片操作符透传至分片算法，完全由应用开发者实现，提供最大的灵活度。
+     对应`ComplexShardingStrategy`。复合分片策略。提供对SQL语句中的`=`, `IN`和`BETWEEN AND`的分片操作支持。`ComplexShardingStrategy`支持多分片键，由于多分片键之间的关系复杂，因此并未进行过多的封装，而是直接将分片键值组合以及分片操作符透传至分片算法，完全由应用开发者实现，提供最大的灵活度。
+
    - 行表达式分片策略
 
-对应`InlineShardingStrategy`。使用Groovy的表达式，提供对SQL语句中的`=`和`IN`的分片操作支持，只支持单分片键。对于简单的分片算法，可以通过简单的配置使用，从而避免繁琐的Java代码开发，如: `t_user_$->{u_id % 8}` 表示`t_user`表根据`u_id`模8，而分成8张表，表名称为`t_user_0`到`t_user_7`。
+     对应`InlineShardingStrategy`。使用Groovy的表达式，提供对SQL语句中的`=`和`IN`的分片操作支持，只支持单分片键。对于简单的分片算法，可以通过简单的配置使用，从而避免繁琐的Java代码开发，如: `t_user_$->{u_id % 8}` 表示`t_user`表根据`u_id`模8，而分成8张表，表名称为`t_user_0`到`t_user_7`。
+
    - 不分片策略
 
-对应`NoneShardingStrategy`。不分片的策略。
+     对应`NoneShardingStrategy`。不分片的策略。
 
 
 
@@ -178,9 +188,8 @@ SELECT i.* FROM t_order_1 o JOIN t_order_item_1 i ON o.order_id=i.order_id WHERE
 1. 所支持和不支持的SQL类型。
 2. 针对分页这类性能相关度很高的问题。
 
-
-
 下面会对这些问题进行一个使用规范的阐述。
+
 
 
 ##### 2.2.2.1. SQL
@@ -196,131 +205,119 @@ SELECT i.* FROM t_order_1 o JOIN t_order_item_1 i ON o.order_id=i.order_id WHERE
    - **路由至单数据节点**
       - 100%全兼容（目前仅MySQL，其他数据库完善中）。
    - **路由至多数据节点**
-
-全面支持DQL、DML、DDL、DCL、TCL。支持分页、去重、排序、分组、聚合、关联查询（不支持跨库关联）。以下用最为复杂的DQL举例：
+   
+      全面支持DQL、DML、DDL、DCL、TCL。支持分页、去重、排序、分组、聚合、关联查询（不支持跨库关联）。以下用最为复杂的DQL举例：
+   
       - SELECT主语句
-```sql
-SELECT select_expr [, select_expr ...] FROM table_reference [, table_reference ...]
-[WHERE where_condition] 
-[GROUP BY {col_name | position} [ASC | DESC]] 
-[ORDER BY {col_name | position} [ASC | DESC], ...] 
-[LIMIT {[offset,] row_count | row_count OFFSET offset}]
-```
-
-      - select_expr
-```sql
-* | 
-[DISTINCT] COLUMN_NAME [AS] [alias] | 
-(MAX | MIN | SUM | AVG)(COLUMN_NAME | alias) [AS] [alias] | 
-COUNT(* | COLUMN_NAME | alias) [AS] [alias]
-```
-
-      - table_reference
-```sql
-tbl_name [AS] alias] [index_hint_list] | 
-table_reference ([INNER] | {LEFT|RIGHT} [OUTER]) JOIN table_factor [JOIN ON conditional_expr | USING (column_list)] |
-```
-
+   
+         ```sql
+         SELECT select_expr [, select_expr ...] FROM table_reference [, table_reference ...]
+         [WHERE where_condition] 
+         [GROUP BY {col_name | position} [ASC | DESC]] 
+         [ORDER BY {col_name | position} [ASC | DESC], ...] 
+         [LIMIT {[offset,] row_count | row_count OFFSET offset}]
+         ```
+   
+      * select_expr
+   
+        ```sql
+        * | 
+        [DISTINCT] COLUMN_NAME [AS] [alias] | 
+        (MAX | MIN | SUM | AVG)(COLUMN_NAME | alias) [AS] [alias] | 
+        COUNT(* | COLUMN_NAME | alias) [AS] [alias]
+        ```
+   
+      * table_reference
+   
+         ```sql
+         tbl_name [AS] alias] [index_hint_list] | 
+         table_reference ([INNER] | {LEFT|RIGHT} [OUTER]) JOIN table_factor [JOIN ON conditional_expr | USING (column_list)] |
+         ```
+   
 - **不支持项**
    - 路由至多数据节点
 
-不支持冗余括号、CASE WHEN、HAVING、UNION (ALL)，有限支持子查询。
+     不支持冗余括号、CASE WHEN、HAVING、UNION (ALL)，有限支持子查询。
 
-除了分页子查询的支持之外，也支持同等模式的子查询。无论嵌套多少层，组件都可以解析至第一个包含数据表的子查询，一旦在下层嵌套中再次找到包含数据表的子查询将直接抛出解析异常。
+     除了分页子查询的支持之外，也支持同等模式的子查询。无论嵌套多少层，组件都可以解析至第一个包含数据表的子查询，一旦在下层嵌套中再次找到包含数据表的子查询将直接抛出解析异常。
 
-例如，以下子查询可以支持：
-```sql
-SELECT COUNT(*) FROM (SELECT * FROM t_order o)
-```
+     例如，以下子查询可以支持：
 
-
-以下子查询不支持：
-```sql
-SELECT COUNT(*) FROM (SELECT * FROM t_order o WHERE o.id IN (SELECT id FROM t_order WHERE status = ?))
-```
-
-
-简单来说，通过子查询进行非功能需求，在大部分情况下是可以支持的。比如分页、统计总数等；而通过子查询实现业务查询当前并不能支持。
-
-由于归并的限制，子查询中包含聚合函数目前无法支持。
-
-不支持包含schema的SQL。因为ShardingSphere的理念是像使用一个数据源一样使用多数据源，因此对SQL的访问都是在同一个逻辑schema之上。
+      ```sql
+      SELECT COUNT(*) FROM (SELECT * FROM t_order o)
+      ```
+		以下子查询不支持：
+      ```sql
+      SELECT COUNT(*) FROM (SELECT * FROM t_order o WHERE o.id IN (SELECT id FROM t_order WHERE status = ?))
+      ```
+     
+     
+     简单来说，通过子查询进行非功能需求，在大部分情况下是可以支持的。比如分页、统计总数等；而通过子查询实现业务查询当前并不能支持。
+     
+     由于归并的限制，子查询中包含聚合函数目前无法支持。
+     
+     不支持包含schema的SQL。因为ShardingSphere的理念是像使用一个数据源一样使用多数据源，因此对SQL的访问都是在同一个逻辑schema之上。
+   
 - **示例**
    - 支持的SQL
-
-
-| SQL | 必要条件 |
-| :--- | :--- |
-| SELECT * FROM tbl_name |  |
-| SELECT * FROM tbl_name WHERE (col1 = ? or col2 = ?) and col3 = ? |  |
-| SELECT * FROM tbl_name WHERE col1 = ? ORDER BY col2 DESC LIMIT ? |  |
-| SELECT COUNT(*), SUM(col1), MIN(col1), MAX(col1), AVG(col1) FROM tbl_name WHERE col1 = ? |  |
-| SELECT COUNT(col1) FROM tbl_name WHERE col2 = ? GROUP BY col1 ORDER BY col3 DESC LIMIT ?, ? |  |
-| INSERT INTO tbl_name (col1, col2,…) VALUES (?, ?, ….) |  |
-| INSERT INTO tbl_name VALUES (?, ?,….) |  |
-| INSERT INTO tbl_name (col1, col2, …) VALUES (?, ?, ….), (?, ?, ….) |  |
-| UPDATE tbl_name SET col1 = ? WHERE col2 = ? |  |
-| DELETE FROM tbl_name WHERE col1 = ? |  |
-| CREATE TABLE tbl_name (col1 int, …) |  |
-| ALTER TABLE tbl_name ADD col1 varchar(10) |  |
-| DROP TABLE tbl_name |  |
-| TRUNCATE TABLE tbl_name |  |
-| CREATE INDEX idx_name ON tbl_name |  |
-| DROP INDEX idx_name ON tbl_name |  |
-| DROP INDEX idx_name | TableRule中配置logic-index |
-| SELECT DISTINCT * FROM tbl_name WHERE col1 = ? |  |
-| SELECT COUNT(DISTINCT col1) FROM tbl_name |  |
-
-
-
+      | SQL | 必要条件 |
+      | :--- | :--- |
+      | SELECT * FROM tbl_name |  |
+      | SELECT * FROM tbl_name WHERE (col1 = ? or col2 = ?) and col3 = ? |  |
+      | SELECT * FROM tbl_name WHERE col1 = ? ORDER BY col2 DESC LIMIT ? |  |
+      | SELECT COUNT(*), SUM(col1), MIN(col1), MAX(col1), AVG(col1) FROM tbl_name WHERE col1 = ? |  |
+      | SELECT COUNT(col1) FROM tbl_name WHERE col2 = ? GROUP BY col1 ORDER BY col3 DESC LIMIT ?, ? |  |
+      | INSERT INTO tbl_name (col1, col2,…) VALUES (?, ?, ….) |  |
+      | INSERT INTO tbl_name VALUES (?, ?,….) |  |
+      | INSERT INTO tbl_name (col1, col2, …) VALUES (?, ?, ….), (?, ?, ….) |  |
+      | UPDATE tbl_name SET col1 = ? WHERE col2 = ? |  |
+      | DELETE FROM tbl_name WHERE col1 = ? |  |
+      | CREATE TABLE tbl_name (col1 int, …) |  |
+      | ALTER TABLE tbl_name ADD col1 varchar(10) |  |
+      | DROP TABLE tbl_name |  |
+      | TRUNCATE TABLE tbl_name |  |
+      | CREATE INDEX idx_name ON tbl_name |  |
+      | DROP INDEX idx_name ON tbl_name |  |
+      | DROP INDEX idx_name | TableRule中配置logic-index |
+      | SELECT DISTINCT * FROM tbl_name WHERE col1 = ? |  |
+      | SELECT COUNT(DISTINCT col1) FROM tbl_name |  |
+      
    - 不支持的SQL
-
-
-| SQL | 不支持原因 |
-| :--- | :--- |
-| INSERT INTO tbl_name (col1, col2, …) VALUES(1+2, ?, …) | VALUES语句不支持运算表达式 |
-| INSERT INTO tbl_name (col1, col2, …) SELECT col1, col2, … FROM tbl_name WHERE col3 = ? | INSERT .. SEL |
-| INSERT INTO tbl_name SET col1 = ? | INSERT .. SET |
-| SELECT COUNT(col1) as count_alias FROM tbl_name GROUP BY col1 HAVING count_alias > ? | HAVING |
-| SELECT _ FROM tbl_name1 UNION SELECT _ FROM tbl_name2 | UNION |
-| SELECT _ FROM tbl_name1 UNION ALL SELECT _ FROM tbl_name2 | UNION ALL |
-| SELECT * FROM tbl_name1 WHERE (val1=?) AND (val1=?) | 冗余括号(MySQL数据库已支持) |
-| SELECT * FROM ds.tbl_name1 | 包含schema |
-| SELECT SUM(DISTINCT col1), SUM(col1) FROM tbl_name | 详见`DISTINCT`支持情况详细说明 |
-
-
+      | SQL | 不支持原因 |
+      | :--- | :--- |
+      | INSERT INTO tbl_name (col1, col2, …) VALUES(1+2, ?, …) | VALUES语句不支持运算表达式 |
+      | INSERT INTO tbl_name (col1, col2, …) SELECT col1, col2, … FROM tbl_name WHERE col3 = ? | INSERT .. SEL |
+      | INSERT INTO tbl_name SET col1 = ? | INSERT .. SET |
+      | SELECT COUNT(col1) as count_alias FROM tbl_name GROUP BY col1 HAVING count_alias > ? | HAVING |
+      | SELECT _ FROM tbl_name1 UNION SELECT _ FROM tbl_name2 | UNION |
+      | SELECT _ FROM tbl_name1 UNION ALL SELECT _ FROM tbl_name2 | UNION ALL |
+      | SELECT * FROM tbl_name1 WHERE (val1=?) AND (val1=?) | 冗余括号(MySQL数据库已支持) |
+      | SELECT * FROM ds.tbl_name1 | 包含schema |
+      | SELECT SUM(DISTINCT col1), SUM(col1) FROM tbl_name | 详见`DISTINCT`支持情况详细说明 |
 
 - **DISTINCT支持情况详细说明**
    - 支持的SQL
-
-
-| SQL | 所需条件 |
-| :--- | :--- |
-| SELECT DISTINCT * FROM tbl_name WHERE col1 = ? |  |
-| SELECT DISTINCT col1 FROM tbl_name |  |
-| SELECT DISTINCT col1, col2, col3 FROM tbl_name |  |
-| SELECT DISTINCT col1 FROM tbl_name ORDER BY col1 |  |
-| SELECT DISTINCT col1 FROM tbl_name ORDER BY col2 |  |
-| SELECT DISTINCT(col1) FROM tbl_name | MySQL |
-| SELECT AVG(DISTINCT col1) FROM tbl_name | MySQL |
-| SELECT SUM(DISTINCT col1) FROM tbl_name | MySQL |
-| SELECT COUNT(DISTINCT col1) FROM tbl_name | MySQL |
-| SELECT COUNT(DISTINCT col1) FROM tbl_name GROUP BY col1 | MySQL |
-| SELECT COUNT(DISTINCT col1 + col2) FROM tbl_name | MySQL |
-| SELECT COUNT(DISTINCT col1), SUM(DISTINCT col1) FROM tbl_name | MySQL |
-| SELECT COUNT(DISTINCT col1), col1 FROM tbl_name GROUP BY col1 | MySQL |
-| SELECT col1, COUNT(DISTINCT col1) FROM tbl_name GROUP BY col1 | MySQL |
-
-
-
-   - 不支持的SQL
-
-
-| SQL | 不支持原因 |
-| :--- | :--- |
-| SELECT SUM(DISTINCT col1), SUM(col1) FROM tbl_name | 同时使用普通聚合函数和DISTINCT聚合函数 |
-
-
+      | SQL | 所需条件 |
+      | :--- | :--- |
+      | SELECT DISTINCT * FROM tbl_name WHERE col1 = ? |  |
+      | SELECT DISTINCT col1 FROM tbl_name |  |
+      | SELECT DISTINCT col1, col2, col3 FROM tbl_name |  |
+      | SELECT DISTINCT col1 FROM tbl_name ORDER BY col1 |  |
+      | SELECT DISTINCT col1 FROM tbl_name ORDER BY col2 |  |
+      | SELECT DISTINCT(col1) FROM tbl_name | MySQL |
+      | SELECT AVG(DISTINCT col1) FROM tbl_name | MySQL |
+      | SELECT SUM(DISTINCT col1) FROM tbl_name | MySQL |
+      | SELECT COUNT(DISTINCT col1) FROM tbl_name | MySQL |
+      | SELECT COUNT(DISTINCT col1) FROM tbl_name GROUP BY col1 | MySQL |
+      | SELECT COUNT(DISTINCT col1 + col2) FROM tbl_name | MySQL |
+      | SELECT COUNT(DISTINCT col1), SUM(DISTINCT col1) FROM tbl_name | MySQL |
+      | SELECT COUNT(DISTINCT col1), col1 FROM tbl_name GROUP BY col1 | MySQL |
+      | SELECT col1, COUNT(DISTINCT col1) FROM tbl_name GROUP BY col1 | MySQL |
+   
+   * 不支持的SQL
+      | SQL | 不支持原因 |
+      | :--- | :--- |
+      | SELECT SUM(DISTINCT col1), SUM(col1) FROM tbl_name | 同时使用普通聚合函数和DISTINCT聚合函数 |
 
 
 
@@ -333,73 +330,74 @@ SELECT COUNT(*) FROM (SELECT * FROM t_order o WHERE o.id IN (SELECT id FROM t_or
 
 - **分页性能**
    - 性能瓶颈
+   
+     查询偏移量过大的分页会导致数据库获取数据性能低下，以MySQL为例：
 
-查询偏移量过大的分页会导致数据库获取数据性能低下，以MySQL为例：
-```sql
-SELECT * FROM t_order ORDER BY id LIMIT 1000000, 10
-```
-
-
-这句SQL会使得MySQL在无法利用索引的情况下跳过1000000条记录后，再获取10条记录，其性能可想而知。 而在分库分表的情况下（假设分为2个库），为了保证数据的正确性，SQL会改写为：
-```sql
-SELECT * FROM t_order ORDER BY id LIMIT 0, 1000010
-```
-
-
-即将偏移量前的记录全部取出，并仅获取排序后的最后10条记录。这会在数据库本身就执行很慢的情况下，进一步加剧性能瓶颈。 因为原SQL仅需要传输10条记录至客户端，而改写之后的SQL则会传输`1,000,010 * 2`的记录至客户端。
+      ```sql
+      SELECT * FROM t_order ORDER BY id LIMIT 1000000, 10
+      ```
+		这句SQL会使得MySQL在无法利用索引的情况下跳过1000000条记录后，再获取10条记录，其性能可想而知。 而在分库分表的情况下（假设分为2个库），为了保证数据的正确性，SQL会改写为：
+      ```sql
+      SELECT * FROM t_order ORDER BY id LIMIT 0, 1000010
+      ```
+     
+     
+     即将偏移量前的记录全部取出，并仅获取排序后的最后10条记录。这会在数据库本身就执行很慢的情况下，进一步加剧性能瓶颈。 因为原SQL仅需要传输10条记录至客户端，而改写之后的SQL则会传输`1,000,010 * 2`的记录至客户端。
+   
 - **组件提供的优化**
 
-组件进行了2个方面的优化。
+   组件进行了2个方面的优化。
 
-首先，采用流式处理 + 归并排序的方式来避免内存的过量占用。由于SQL改写不可避免的占用了额外的带宽，但并不会导致内存暴涨。 与直觉不同，大多数人认为组件会将`1,000,010 * 2`记录全部加载至内存，进而占用大量内存而导致内存溢出。 但由于每个结果集的记录是有序的，因此组件每次比较仅获取各个分片的当前结果集记录，驻留在内存中的记录仅为当前路由到的分片的结果集的当前游标指向而已。对于本身即有序的待排序对象，归并排序的时间复杂度仅为`O(n)`，性能损耗很小。
+   首先，采用流式处理 + 归并排序的方式来避免内存的过量占用。由于SQL改写不可避免的占用了额外的带宽，但并不会导致内存暴涨。 与直觉不同，大多数人认为组件会将`1,000,010 * 2`记录全部加载至内存，进而占用大量内存而导致内存溢出。 但由于每个结果集的记录是有序的，因此组件每次比较仅获取各个分片的当前结果集记录，驻留在内存中的记录仅为当前路由到的分片的结果集的当前游标指向而已。对于本身即有序的待排序对象，归并排序的时间复杂度仅为`O(n)`，性能损耗很小。
 
-其次，组件对仅落至单分片的查询进行进一步优化。落至单分片查询的请求并不需要改写SQL也可以保证记录的正确性，因此在此种情况下，组件并未进行SQL改写，从而达到节省带宽的目的。
+   其次，组件对仅落至单分片的查询进行进一步优化。落至单分片查询的请求并不需要改写SQL也可以保证记录的正确性，因此在此种情况下，组件并未进行SQL改写，从而达到节省带宽的目的。
+
 - **分页方案优化**
 
-由于LIMIT并不能通过索引查询数据，因此如果可以保证ID的连续性，通过ID进行分页是比较好的解决方案：
-```sql
-SELECT * FROM t_order WHERE id > 100000 AND id <= 100010 ORDER BY id
-```
+  由于LIMIT并不能通过索引查询数据，因此如果可以保证ID的连续性，通过ID进行分页是比较好的解决方案：
+  ```sql
+  SELECT * FROM t_order WHERE id > 100000 AND id <= 100010 ORDER BY id
+  ```
 
-
-或通过记录上次查询结果的最后一条记录的ID进行下一页的查询：
-```sql
-SELECT * FROM t_order WHERE id > 100000 LIMIT 10
-```
+  或通过记录上次查询结果的最后一条记录的ID进行下一页的查询：
+  ```sql
+  SELECT * FROM t_order WHERE id > 100000 LIMIT 10
+  ```
 
 - **分页子查询**
 
-Oracle和SQLServer的分页都需要通过子查询来处理，组件支持分页相关的子查询。
+   Oracle和SQLServer的分页都需要通过子查询来处理，组件支持分页相关的子查询。
+
    - Oracle
 
-支持使用rownum进行分页：
-```sql
-SELECT * FROM (SELECT row_.*, rownum rownum_ FROM (SELECT o.order_id as order_id FROM t_order o JOIN t_order_item i ON o.order_id = i.order_id) row_ WHERE rownum <= ?) WHERE rownum > ?
-```
+     支持使用rownum进行分页：
 
-
-目前不支持rownum + BETWEEN的分页方式。
+      ```sql
+      SELECT * FROM (SELECT row_.*, rownum rownum_ FROM (SELECT o.order_id as order_id FROM t_order o JOIN t_order_item i ON o.order_id = i.order_id) row_ WHERE rownum <= ?) WHERE rownum > ?
+      ```
+     
+     
+     目前不支持rownum + BETWEEN的分页方式。
+     
    - SQLServer
+   
+     支持使用TOP + ROW_NUMBER() OVER配合进行分页：
 
-支持使用TOP + ROW_NUMBER() OVER配合进行分页：
-```sql
-SELECT * FROM (SELECT TOP (?) ROW_NUMBER() OVER (ORDER BY o.order_id DESC) AS rownum, * FROM t_order o) AS temp WHERE temp.rownum > ? ORDER BY temp.order_id
-```
-
-
-支持SQLServer 2012之后的OFFSET FETCH的分页方式：
-```sql
-SELECT * FROM t_order o ORDER BY id OFFSET ? ROW FETCH NEXT ? ROWS ONLY
-```
-
-
-目前不支持使用WITH xxx AS (SELECT …)的方式进行分页。由于Hibernate自动生成的SQLServer分页语句使用了WITH语句，因此目前并不支持基于Hibernate的SQLServer分页。 目前也不支持使用两个TOP + 子查询的方式实现分页。
+      ```sql
+      SELECT * FROM (SELECT TOP (?) ROW_NUMBER() OVER (ORDER BY o.order_id DESC) AS rownum, * FROM t_order o) AS temp WHERE temp.rownum > ? ORDER BY temp.order_id
+      ```
+		支持SQLServer 2012之后的OFFSET FETCH的分页方式：
+     
+      ```sql
+      SELECT * FROM t_order o ORDER BY id OFFSET ? ROW FETCH NEXT ? ROWS ONLY
+      ```
+		目前不支持使用WITH xxx AS (SELECT …)的方式进行分页。由于Hibernate自动生成的SQLServer分页语句使用了WITH语句，因此目前并不支持基于Hibernate的SQLServer分页。 目前也不支持使用两个TOP + 子查询的方式实现分页。
    - MySQL, PostgreSQL
-
-MySQL和PostgreSQL都支持LIMIT分页，无需子查询：
-```sql
-SELECT * FROM t_order o ORDER BY id LIMIT ? OFFSET ?
-```
+		MySQL和PostgreSQL都支持LIMIT分页，无需子查询：
+     
+      ```sql
+      SELECT * FROM t_order o ORDER BY id LIMIT ? OFFSET ?
+      ```
 
 
 
@@ -417,6 +415,7 @@ SELECT * FROM t_order o ORDER BY id LIMIT ? OFFSET ?
 
 
 对于常见的分片算法，使用Java代码实现并不有助于配置的统一管理。通过行表达式书写分片算法，可以有效的将规则配置一同存放，更加易于浏览与存储。
+
 
 
 ##### 2.2.3.2. 语法说明
@@ -448,6 +447,7 @@ $->{['online', 'offline']}_table${1..3}
 ```
 online_table1, online_table2, online_table3, offline_table1, offline_table2, offline_table3
 ```
+
 
 
 ##### 2.2.3.3. 配置数据节点
@@ -555,6 +555,7 @@ db->${0..1}.t_order_0$->{0..9}, db$->{0..1}.t_order_$->{10..20}
 ```
 
 
+
 ##### 2.2.3.4. 配置分片算法
 
 
@@ -570,6 +571,7 @@ db->${0..1}.t_order_0$->{0..9}, db$->{0..1}.t_order_$->{10..20}
 ```
 ds$->{id % 10}
 ```
+
 
 
 #### 2.2.4. 分布式主键
@@ -589,47 +591,53 @@ ds$->{id % 10}
 
 - **UUID**
 
-采用`UUID.randomUUID()`的方式产生分布式主键。
+  采用`UUID.randomUUID()`的方式产生分布式主键。
+
 - **SNOWFLAKE**
 
-组件提供灵活的配置分布式主键生成策略方式。 在分片规则配置模块可配置每个表的主键生成策略，默认使用雪花算法（snowflake）生成64bit的长整型数据。
+  组件提供灵活的配置分布式主键生成策略方式。 在分片规则配置模块可配置每个表的主键生成策略，默认使用雪花算法（snowflake）生成64bit的长整型数据。
 
-雪花算法是由Twitter公布的分布式主键生成算法，它能够保证不同进程主键的不重复性，以及相同进程主键的有序性。
+  雪花算法是由Twitter公布的分布式主键生成算法，它能够保证不同进程主键的不重复性，以及相同进程主键的有序性。
 
-在同一个进程中，它首先是通过时间位保证不重复，如果时间相同则是通过序列位保证。 同时由于时间位是单调递增的，且各个服务器如果大体做了时间同步，那么生成的主键在分布式环境可以认为是总体有序的，这就保证了对索引字段的插入的高效性。例如MySQL的Innodb存储引擎的主键。
+  在同一个进程中，它首先是通过时间位保证不重复，如果时间相同则是通过序列位保证。 同时由于时间位是单调递增的，且各个服务器如果大体做了时间同步，那么生成的主键在分布式环境可以认为是总体有序的，这就保证了对索引字段的插入的高效性。例如MySQL的Innodb存储引擎的主键。
 
-使用雪花算法生成的主键，二进制表示形式包含4部分，从高位到低位分表为：1bit符号位、41bit时间戳位、10bit工作进程位以及12bit序列号位。
-   - 符号位(1bit)
+  使用雪花算法生成的主键，二进制表示形式包含4部分，从高位到低位分表为：1bit符号位、41bit时间戳位、10bit工作进程位以及12bit序列号位。
 
-预留的符号位，恒为零。
-   - 时间戳位(41bit)
+  * 符号位(1bit)
 
-41位的时间戳可以容纳的毫秒数是2的41次幂，一年所使用的毫秒数是：`365 * 24 * 60 * 60 * 1000`。通过计算可知：
-```java
-Math.pow(2, 41) / (365 * 24 * 60 * 60 * 1000L);
-```
+    预留的符号位，恒为零。
 
+  * 时间戳位(41bit)
 
-结果约等于69.73年。组件的雪花算法的时间纪元从2016年11月1日零点开始，可以使用到2086年，相信能满足绝大部分系统的要求。
-   - 工作进程位(10bit)
+    41位的时间戳可以容纳的毫秒数是2的41次幂，一年所使用的毫秒数是：`365 * 24 * 60 * 60 * 1000`。通过计算可知：
 
-该标志在Java进程内是唯一的，如果是分布式应用部署应保证每个工作进程的id是不同的。该值默认为0，可通过属性设置。
-   - 序列号位(12bit)
+    ```java
+    Math.pow(2, 41) / (365 * 24 * 60 * 60 * 1000L);
+    ```
 
-该序列是用来在同一个毫秒内生成不同的ID。如果在这个毫秒内生成的数量超过4096(2的12次幂)，那么生成器会等待到下个毫秒继续生成。
+    结果约等于69.73年。组件的雪花算法的时间纪元从2016年11月1日零点开始，可以使用到2086年，相信能满足绝大部分系统的要求。
 
+  * 工作进程位(10bit)
 
-**时钟回拨**
+    该标志在Java进程内是唯一的，如果是分布式应用部署应保证每个工作进程的id是不同的。该值默认为0，可通过属性设置。
 
-服务器时钟回拨会导致产生重复序列，因此默认分布式主键生成器提供了一个最大容忍的时钟回拨毫秒数。 如果时钟回拨的时间超过最大容忍的毫秒数阈值，则程序报错；如果在可容忍的范围内，默认分布式主键生成器会等待时钟同步到最后一次主键生成的时间后再继续工作。 最大容忍的时钟回拨毫秒数的默认值为0，可通过属性设置。
+  * 序列号位(12bit)
 
-雪花算法主键的详细结构见下图。
+    该序列是用来在同一个毫秒内生成不同的ID。如果在这个毫秒内生成的数量超过4096(2的12次幂)，那么生成器会等待到下个毫秒继续生成。
 
-![](https://cdn.nlark.com/yuque/0/2020/png/1241873/1590744537540-72a4561d-da15-4f2e-9da8-4862f2b26f6f.png#align=left&display=inline&height=405&margin=%5Bobject%20Object%5D&originHeight=405&originWidth=966&status=done&style=none&width=966)
+  
+
+  **时钟回拨**
+
+  服务器时钟回拨会导致产生重复序列，因此默认分布式主键生成器提供了一个最大容忍的时钟回拨毫秒数。 如果时钟回拨的时间超过最大容忍的毫秒数阈值，则程序报错；如果在可容忍的范围内，默认分布式主键生成器会等待时钟同步到最后一次主键生成的时间后再继续工作。 最大容忍的时钟回拨毫秒数的默认值为0，可通过属性设置。
+
+  雪花算法主键的详细结构见下图。
+
+  ![](.assets/1590744537540-72a4561d-da15-4f2e-9da8-4862f2b26f6f.png)
 
 - **ZK_BASED_SNOWFLAKE**
 
-在SNOWFLAKE算法的基础上，通过Zookeeper协调自动生成唯一的**工作进程位(10bit)**，以方便集群化部署。
+  在SNOWFLAKE算法的基础上，通过Zookeeper协调自动生成唯一的**工作进程位(10bit)**，以方便集群化部署。
 
 
 
@@ -637,8 +645,6 @@ Math.pow(2, 41) / (365 * 24 * 60 * 60 * 1000L);
 
 
 > 可使用原生事务注解，如：`@Transactional`，无需额外处理。
-
-
 
 这里的跨库事务主要是基于本地事务的一种扩展，其特性主要包括：
 
@@ -776,6 +782,7 @@ spring:
 **特别注意：** 这里定义的数据源，需要将`spring.datasource.base-datasource-configure.default-candidate`的值设置为`false`，以避免和后面的读写分离数据源冲突。
 
 
+
 ### 4.2. 读写分离属性配置
 
 
@@ -795,6 +802,7 @@ spring:
       #从库负载均衡算法(实现MasterSlaveLoadBalanceAlgorithm接口)
       #load-balance-algorithm-type:
 ```
+
 
 
 ### 4.3. 读写分离属性描述
@@ -824,14 +832,14 @@ spring:
 
 
 - 获取`HintManager`：
-```java
-HintManager hintManager = HintManager.getInstance();
-```
+  ```java
+  HintManager hintManager = HintManager.getInstance();
+  ```
 
 - 设置主库路由：
-```java
-hintManager.setMasterRouteOnly();
-```
+  ```java
+  hintManager.setMasterRouteOnly();
+  ```
 
 
 
@@ -843,6 +851,7 @@ hintManager.setMasterRouteOnly();
 
 
 `hintManager`实现了`java.lang.AutoCloseable`接口，可推荐使用`try-with-resource`语法自动关闭。
+
 
 
 #### 4.4.3. 完整代码示例
@@ -857,6 +866,7 @@ try(HintManager hintManager = HintManager.getInstance()) {
     userDao.selectByPrimaryKey(2L);
 }
 ```
+
 
 
 ### 4.5. 使用场景模拟
@@ -1348,8 +1358,6 @@ public void insertWithShardingTable() {
 
 > `ts_order`通过`order_id`进行分片。
 
-
-
 **ts_order_0**
 
 
@@ -1548,8 +1556,6 @@ public void queryBetweenWithShardingTable() {
 
 > 如在分库环境下，每个库的表连接各自库中的数据，然后进行归并。不支持跨库的表连接。
 
-
-
 ```java
 public void queryJoinWithShardingTable() {
     List<Order> order = orderDao.selectOrderDetail(5L);
@@ -1653,6 +1659,7 @@ spring:
 ```
 
 
+
 ### 5.6. 分库属性描述
 
 
@@ -1708,6 +1715,7 @@ db2
 ```
 
 
+
 #### 5.7.2. 分库插入场景
 
 
@@ -1742,8 +1750,6 @@ public void insertWithShardingDatabase() {
 
 > `ts_order`通过`user_id`进行分片，这里仅做部分数据展示。
 
-
-
 **db0.ts_order_0**
 
 
@@ -1769,23 +1775,15 @@ public void insertWithShardingDatabase() {
 
 
 
-
 **db2.ts_order_0**
 
 
 | id | order_id | user_id | order_type | order_amount | order_date |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-
-
-
-
-89419407746400257	58	173	05	535168384.0000	2019-07-05 05:00:48
-
-89419407771566081	57	137	18	663731712.0000	2019-07-05 05:00:48
-
-89419407884812289	56	185	09	59368644.0000	2019-07-05 05:00:48
-
-89419407905783809	55	170	07	617952128.0000	2019-07-05 05:00:48
+|89419407746400257	|58	|173	|05	|535168384.0000	|2019-07-05 05:00:48|
+|89419407771566081	|57	|137	|18	|663731712.0000	|2019-07-05 05:00:48|
+|89419407884812289	|56	|185	|09	|59368644.0000	|2019-07-05 05:00:48|
+|89419407905783809	|55	|170	|07	|617952128.0000	|2019-07-05 05:00:48|
 
 
 输出日志片段：
@@ -2045,6 +2043,7 @@ spring:
 ```
 
 
+
 ### 5.9. 分库&分表属性描述
 
 
@@ -2147,8 +2146,6 @@ public void insertWithShardingTd() {
 
 
 > `ts_order`通过`order_id`进行分库，`user_id`进行分表，这里仅做部分数据展示。
-
-
 
 **db0.ts_order_0**
 
@@ -2593,6 +2590,7 @@ spring:
 **特别注意：** 这里定义的数据源，需要将`spring.datasource.base-datasource-configure.default-candidate`的值设置为`false`，以避免和后面定义的分片&读写分离数据源冲突。
 
 
+
 ### 6.2. 属性配置
 
 
@@ -2694,6 +2692,7 @@ spring:
 ```
 
 
+
 ### 6.3. 属性描述
 
 
@@ -2791,6 +2790,7 @@ slave11
 ```
 
 
+
 #### 6.4.2. 分库&分表&读写分离插入场景
 
 
@@ -2824,8 +2824,6 @@ public void insertWithShardingTdRws() {
 
 
 > `ts_order`通过`order_id`进行分库，`user_id`进行分表，这里仅做部分数据展示。
-
-
 
 **master0.ts_order_0**
 
@@ -3100,6 +3098,7 @@ spring:
 ```
 
 
+
 ### 7.2. 属性描述
 
 
@@ -3116,31 +3115,6 @@ spring:
 
 
 
-sql.show: #是否开启SQL显示，默认值: false
-
-acceptor.size: # accept连接的线程数量,默认为cpu核数2倍
-
-executor.size: #工作线程数量最大，默认值: 无限制
-
-max.connections.size.per.query: # 每个查询可以打开的最大连接数量,默认为1
-
-proxy.frontend.flush.threshold: # proxy的服务时候,对于单个大查询,每多少个网络包返回一次
-
-check.table.metadata.enabled: #是否在启动时检查分表元数据一致性，默认值: false
-
-proxy.transaction.type: # 默认LOCAL,proxy的事务模型 允许LOCAL,XA,BASE三个值 LOCAL无分布式事务,XA则是采用atomikos实现的分布式事务 BASE目前尚未实现
-
-proxy.opentracing.enabled: # 是否启用opentracing
-
-proxy.backend.use.nio: # 是否采用netty的NIO机制连接后端数据库,默认False ,使用epoll机制
-
-proxy.backend.max.connections: # 使用NIO而非epoll的话,proxy后台连接每个netty客户端允许的最大连接数量(注意不是数据库连接限制) 默认为8
-
-proxy.backend.connection.timeout.seconds: #使用nio而非epoll的话,proxy后台连接的超时时间,默认60s
-
-check.table.metadata.enabled: # 是否在启动时候,检查sharing的表的实际元数据是否一致,默认False
-
-
 ## 8. 分片算法扩展
 
 
@@ -3155,20 +3129,20 @@ check.table.metadata.enabled: # 是否在启动时候,检查sharing的表的实�
 
 > 组件默认提供的分片算法可以参考包`com.github.semak.shardingjdbc.sharding.algorithm`下的类。
 
-
-
 目前提供3种分片算法。由于分片算法和业务实现紧密相关，组件仅提供了较为简单的单键取模分片算法，并未提供其他内置分片算法。但组件还是通过分片策略将各种场景提炼出来，提供更高层级的抽象，并提供接口让应用开发者自行实现分片算法。
 
 
 - 精确分片算法
 
-对应`PreciseShardingAlgorithm`，用于处理使用单一键作为分片键的`=`与`IN`进行分片的场景。
+  对应`PreciseShardingAlgorithm`，用于处理使用单一键作为分片键的`=`与`IN`进行分片的场景。
+
 - 范围分片算法
 
-对应`RangeShardingAlgorithm`，用于处理使用单一键作为分片键的`BETWEEN AND`进行分片的场景。
+  对应`RangeShardingAlgorithm`，用于处理使用单一键作为分片键的`BETWEEN AND`进行分片的场景。
+
 - 复合分片算法
 
-对应`ComplexKeysShardingAlgorithm`，用于处理使用多键作为分片键进行分片的场景，包含多个分片键的逻辑较复杂，需要应用开发者自行处理其中的复杂度。
+  对应`ComplexKeysShardingAlgorithm`，用于处理使用多键作为分片键进行分片的场景，包含多个分片键的逻辑较复杂，需要应用开发者自行处理其中的复杂度。
 
 
 
@@ -3180,13 +3154,15 @@ check.table.metadata.enabled: # 是否在启动时候,检查sharing的表的实�
 
 - 标准分片策略
 
-对应`StandardShardingStrategy`。提供对SQL语句中的`=`, `IN`和`BETWEEN AND`的分片操作支持。`StandardShardingStrategy`只支持单分片键，提供`PreciseShardingAlgorithm`和`RangeShardingAlgorithm`两个分片算法。`PreciseShardingAlgorithm`是必选的，用于处理`=`和`IN`的分片。`RangeShardingAlgorithm`是可选的，用于处理`BETWEEN AND`分片，如果不配置`RangeShardingAlgorithm`，SQL中的`BETWEEN AND`将按照全库路由处理。
+  对应`StandardShardingStrategy`。提供对SQL语句中的`=`, `IN`和`BETWEEN AND`的分片操作支持。`StandardShardingStrategy`只支持单分片键，提供`PreciseShardingAlgorithm`和`RangeShardingAlgorithm`两个分片算法。`PreciseShardingAlgorithm`是必选的，用于处理`=`和`IN`的分片。`RangeShardingAlgorithm`是可选的，用于处理`BETWEEN AND`分片，如果不配置`RangeShardingAlgorithm`，SQL中的`BETWEEN AND`将按照全库路由处理。
+
 - 复合分片策略
 
-对应`ComplexShardingStrategy`。复合分片策略。提供对SQL语句中的`=`, `IN`和`BETWEEN AND`的分片操作支持。`ComplexShardingStrategy`支持**多分片键**，由于多分片键之间的关系复杂，因此并未进行过多的封装，而是直接将分片键值组合以及分片操作符透传至分片算法，完全由应用开发者实现，提供最大的灵活度。
+  对应`ComplexShardingStrategy`。复合分片策略。提供对SQL语句中的`=`, `IN`和`BETWEEN AND`的分片操作支持。`ComplexShardingStrategy`支持**多分片键**，由于多分片键之间的关系复杂，因此并未进行过多的封装，而是直接将分片键值组合以及分片操作符透传至分片算法，完全由应用开发者实现，提供最大的灵活度。
+
 - 行表达式分片策略
 
-对应**InlineShardingStrategy**。使用Groovy的表达式，提供对SQL语句中的`=`和`IN`的分片操作支持，**只支持单分片键**。对于简单的分片算法，可以通过简单的配置使用，从而避免繁琐的Java代码开发，如: `t_user_$->{u_id % 8}` 表示t_user表根据u_id模8，而分成8张表，表名称为`t_user_0`到`t_user_7`。
+  对应**InlineShardingStrategy**。使用Groovy的表达式，提供对SQL语句中的`=`和`IN`的分片操作支持，**只支持单分片键**。对于简单的分片算法，可以通过简单的配置使用，从而避免繁琐的Java代码开发，如: `t_user_$->{u_id % 8}` 表示t_user表根据u_id模8，而分成8张表，表名称为`t_user_0`到`t_user_7`。
 
 
 
