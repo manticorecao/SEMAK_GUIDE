@@ -1,3 +1,5 @@
+# semak-rest
+
 `rsemak-rest` 组件是一款基于Spring Rest构建的组件。除了支持最基本的RESTful风格服务之外，通过整合SpringCloud和SpringCloud Alibaba，将 `semak-rest` 组件纳入到一个更大的服务治理生态圈之内，大幅提高其应用价值。通过整合一系列的功能，组件提供了如下的一些特性：
 
 
@@ -21,7 +23,7 @@
 
 **客户端功能：**
 
-1. 基于Spring Cloud Openfeign构建的基于接口代理实现的Rest服务客户端，支持基于具体URL和基于服务发现的REST服务调用。
+1. 基于Spring Cloud OpenFeign构建的基于接口代理实现的Rest服务客户端，支持基于具体URL和基于服务发现的REST服务调用。
 1. 支持基于Spring Cloud Ribbon的客户端负载均衡功能（仅限于服务发现功能启用时）。
 1. 支持基于HttpClient和OkHttp的客户端Http实现。
 1. 支持客户端发送请求前对Http Headers的动态设置。
@@ -39,8 +41,6 @@
 
 
 
-
-
 ## 1. 先决条件
 ### 1.1. 环境配置
 
@@ -51,8 +51,6 @@
 
 ### 1.2. Maven依赖配置
 > 以下Maven依赖二选一，根据实际项目需要进行选择。
-
-
 
 #### 1.2.1. 核心依赖（服务端+客户端完整功能）
 ```xml
@@ -72,7 +70,9 @@
 ```
 
 
+
 ## 2. 服务端功能
+
 ### 2.1. 服务定义方式
 和一般直接定义一个**RestController**类不同，基于 `semak-rest` 组件的服务在定义上需要遵循下面一些约定。
 
@@ -198,11 +198,7 @@ public class DefaultDemoFacade implements DemoFacade {
    - **@RequestParam**: 可选，指定方法参数绑定到**请求参数**上。
    - **@PathVariable**: 可选，指定方法参数绑定到**URI模板变量**上（如： `/appHello/{name}` 中的URI模板变量为 `name` ）。
 
-
-
 如果是从 `Jax-rs` 注解迁移过来的同学（如之前使用Jersey、Resteasy等基于Jax-rs实现的类库），参考下面这张注解比对表进行注解迁移：
-
-
 
 | **JAX-RS Annotation** | **Spring Annotation** |
 | :--- | :--- |
@@ -223,13 +219,14 @@ public class DefaultDemoFacade implements DemoFacade {
 | @Produces("application/json") | @RequestMapping(produces = {"application/json"}) |
 | @Consumes("application/json") | @RequestMapping(consumes = {"application/json"}) |
 
-
-
 根据Jax-rs 2.0 Spec的规范，我们可以看到它所支持的Http方法注解的种类：
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593310580313-eda0dd2a-c5cb-4031-9562-1d427a0077ae.png#align=left&display=inline&height=211&margin=%5Bobject%20Object%5D&name=image.png&originHeight=211&originWidth=753&size=47464&status=done&style=none&width=753)
+
+![image.png](.assets/1593310580313-eda0dd2a-c5cb-4031-9562-1d427a0077ae.png)
+
 
 
 #### 2.1.3. 需遵循的标准响应报文格式
+
 `semak-rest` 组件定义了类 `com.github.semak.commons.model.dto.Response` 来规范响应报文，其遵循的响应报文结构如下(这里以JSON展示)：
 ```json
 {
@@ -358,7 +355,9 @@ public UserResponse addUserWithIgnoreAdvice(@RequestBody @Valid UserRequest user
 可以看到，未经过二次处理的响应报文，已经没有外层的包装了。
 
 
+
 ### 2.2. 接口文档交互与管理
+
 之前，我们会使用SpringFox的Swagger类库来为我们的APIs生成文档。但目前最新的版本-2.9.2仍旧使用OpenAPI 2的规范，且与SpringBoot2.x适配时亦有问题。有鉴于此， `semak-rest` 组件采用了 `springdoc-openapi` 的类库来替代，`springdoc-openapi`不仅能为我们的API生成标准的OpenAPI 3文档，与SpringBoot2.x整合良好，还能较好地兼容Swagger。
 
 利用 `springdoc-openapi` 标准的OpenAPI 3规范（也可以说是将Swagger3整合了进来），可以和原有的Swagger-UI进行整合，故在展现层的操作上和原来的UI基本一致。
@@ -413,7 +412,10 @@ springdoc:
 | **springdoc.info.license** | io.swagger.v3.oas.models.info.License | 否 |  | 所有开放的API的证书信息 |
 | **springdoc.info.version** | String | 否 |  | API文档版本信息 |
 
+
+
 #### 2.2.3. DTO的注解
+
 下面是为一个DTO添加 `springdoc-openapi` 注解的例子：
 ```java
 @Schema(description = "用户请求")
@@ -476,7 +478,7 @@ public class DefaultDemoFacade implements DemoFacade {
 
 - **@Tag**：适用于类、方法级的注解。类级别使用时，定义所有操作的一个统一标记；方法级别使用时，定义单个操作的标记。
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593333437635-f36872b8-ceca-41f1-a451-37df036c50a5.png#align=left&display=inline&height=214&margin=%5Bobject%20Object%5D&name=image.png&originHeight=285&originWidth=1485&size=34108&status=done&style=shadow&width=1114)
+  ![image.png](.assets/1593333437635-f36872b8-ceca-41f1-a451-37df036c50a5.png)
 
    - 上图我们可以看到，在类级别用@Tag来定义name值为“Demo服务”的时候，类中包含的所有可操作的方法都会归类到这个Tag下面。
    - 如果为其中某个可操作的方法再打上@Tag时，此方法会额外再分出一个Tag出来以区别其他Tag。
@@ -486,12 +488,13 @@ public class DefaultDemoFacade implements DemoFacade {
 
 更多的注解使用方式，请参照 `io.swagger.v3.oas.annotations` 包下的注解的源码注释，并参照[相关文档](https://springdoc.org)进行释疑。
 
-
 一个较为完整的展示API文档展示页大致如下，可以作为参考：
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593335854774-9d2674de-0afb-489b-84ce-49178f0b1eaa.png#align=left&display=inline&height=981&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1308&originWidth=1480&size=163030&status=done&style=shadow&width=1110)
+![image.png](.assets/1593335854774-9d2674de-0afb-489b-84ce-49178f0b1eaa.png)
+
 
 
 ### 2.3. 异常处理
+
 `semak-rest` 组件提供了全局的异常处理器，处理结果通过合适的数据适配器进行输出（取决于Http Header的Accept的值）。但由于异常类型不同，我们也需要区别对待，比如：业务异常和系统异常。
 
 
@@ -503,8 +506,6 @@ public class DefaultDemoFacade implements DemoFacade {
 
 
 > **SPI **Service Provider Interface，是一种**调用方**来制定接口，**实现方**针对接口进行不同的实现。**调用方**来选择自己需要的实现方。 和API（Application Programming Interface）不同，都是**实现方**来制定接口并完成对接口的不同实现，**调用方**仅仅依赖却无权选择不同实现。
-
-
 
 具体接入流程如下：
 
@@ -542,12 +543,11 @@ public class XxxDefaultBizExceptionDescriber implements BizExceptionDescriber {
 - **getErrorCodeMethod**: 业务异常类中，获取错误码的方法。
 - **getErrorMessageMethod**: 业务异常类中，获取错误消息的方法。
 
-
-
 这样，就完成了自定义的业务异常类的接入。
 
 
 为了避免组件整合过程中的复杂度， `semak-rest` 组件也提供了默认的业务异常类接入，在没有检测到任何的SPI方式的实现接入的时候，会使用 `com.github.semak.rest.core.DefaultBizExceptionDescriber` 来进行实现，对应的业务异常类为 `com.github.semak.rest.core.exception.BizException` 。
+
 
 
 #### 2.3.2. 业务异常处理
@@ -566,6 +566,7 @@ com.github.semak.rest.core.exception.BizException: 业务异常|3
   "message": "业务异常|3"
 }
 ```
+
 
 
 #### 2.3.3. 系统异常处理
@@ -589,7 +590,9 @@ java.lang.Throwable: userRequest.username个数必须在0和10之间
 ```
 
 
+
 ##### 2.3.3.2. 服务端异常处理
+
 所谓**服务端异常**，主要指的是`5XX`的异常，通常是由于服务方内部程序错误引起的。由于和用户没有相关性，故错误信息会统一包装成服务器内部异常返回到调用方，而不会出现过多的堆栈内容。
 比如，我们请求后，服务端运算出错了，抛出异常：
 ```
@@ -608,7 +611,9 @@ java.lang.RuntimeException: 系统异常|4
 在返回给调用方的报文中，组件统一封装错误信息为`Internal Server Error`。这样，系统级的错误信息就不会展现到用户层面。
 
 
+
 #### 2.3.4. Http状态码映射
+
 `semak-rest` 组件对原始Http状态码的返回进行了包装，以区分Http状态码和业务状态码。比如，**404**的http状态码映射为**-40400**的错误代码，映射的效果如下：
 
 
@@ -669,7 +674,10 @@ java.lang.RuntimeException: 系统异常|4
 
 **注意：对于业务状态码的定义，不在此范围内，需要额外定义。**
 
+
+
 ### 2.4. 出入站报文日志
+
 （服务端）出入站报文日志其实是记录了通讯过程中的有效负载报文，便于问题定位时进行参考。需要在日志配置文件中通过配置相应的日志节点来打开日志。
 
 #### 2.4.1. 入站报文节点配置
@@ -682,7 +690,9 @@ java.lang.RuntimeException: 系统异常|4
 ```
 
 
+
 #### 2.4.2. 入站报文样例
+
 ```
 2020-06-29 13:02:41.312 DEBUG [192.168.1.190,f02ea29fece55234] --- [XNIO-1 task-1] com.github.semak.rest.server.logging.inbound :
 7 * Server received a request on thread XNIO-1 task-1
@@ -705,7 +715,9 @@ java.lang.RuntimeException: 系统异常|4
 ```
 
 
+
 #### 2.4.3. 出站报文节点配置
+
 > 基于Logback
 
 ```xml
@@ -715,7 +727,9 @@ java.lang.RuntimeException: 系统异常|4
 ```
 
 
+
 #### 2.4.4. 出站报文样例
+
 ```
 2020-06-29 13:02:41.315 DEBUG [192.168.1.190,f02ea29fece55234] --- [XNIO-1 task-1] com.github.semak.rest.server.logging.outbound :
 7 * Server responded with a response on thread XNIO-1 task-1
@@ -734,7 +748,9 @@ java.lang.RuntimeException: 系统异常|4
 ```
 
 
+
 ### 2.5. 跨域处理
+
 为了处理跨域问题， `semak-rest` 组件默认支持对跨域的配置。
 
 
@@ -766,14 +782,13 @@ spring:
    allowed-methods:
      - POST
 ```
-**
+
 **配置描述**
 
 
-
 | **属性** | **数据类型** | **必填** | **默认值** | **描述** |
-| **spring.cors.enabled** | boolean | 否 | false | 开启跨域支持 |
 | :--- | :--- | :--- | :--- | :--- |
+| **spring.cors.enabled** | boolean | 否 | false | 开启跨域支持 |
 | **spring.cors.allowed-origins** | String 或 List<String> | 否 |   | 允许的主机列表，全部允许设置为`*` |
 | **spring.cors.allowed-headers** | String 或 List<String> | 否 |   | 允许的Header列表，全部允许设置为`*` |
 | **spring.cors.allowed-methods** | String 或 List<String> | 否 |   | 允许的请求Method列表，全部允许设置为`*` |
@@ -804,7 +819,9 @@ public class FeignScannerConfiguration {
 ```
 
 
+
 ##### 3.1.1.2. 创建与渲染接口
+
 ```java
 @FeignClient(name = "demo-feign", url="${demo-feign.url:}")
 @RequestMapping(value = "/json", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -828,12 +845,14 @@ public interface Remote3RdFacade {
 ```yaml
 spring:
   main:
-    #spring-boot 2.1后，此属性默认变为false，造成同名bean（有其是feign的bean）报错，主要是为了Feign而更改
+    #spring-boot 2.1后，此属性默认变为false，造成同名bean（尤其是feign的bean）报错，主要是为了Feign而更改
     allow-bean-definition-overriding: true
 ```
 
 
+
 #### 3.1.2. 接口配置
+
 基于上面样例，我们需要进行一些简单的配置。这些配置可以添加在应用配置`application.yaml`中。
 
 
@@ -861,7 +880,9 @@ feign:
 ```
 
 
+
 #### 3.1.3. 调用服务
+
 基于上面样例创建并配置完接口后，我们来调用一下。这个服务是查询淘宝IP地址库来获取具体IP信息的服务。
 ```java
 @Autowired
@@ -897,7 +918,9 @@ public void queryIP(){
 ```
 
 
+
 ### 3.2. 处理非标准响应报文格式
+
 大部分情况下，我们的服务通讯都会遵循一定的规范和格式，这样既利于沟通，也利于组件或框架来处理。但还是有一部分情况，它们的响应报文格式并非我们所期望的，比如：遗留系统，外部服务等。所以，这里我们主要讲解一下怎么处理这类非标准的响应报文格式。
 
 
@@ -990,8 +1013,6 @@ public class NonStandardReaderPlugin implements ReaderPlugin {
 
 
 
-
-
 ##### 3.2.2.2. 使用处理非标准响应报文格式的插件
 通过显式注解 `@Reader` 来适配响应报文格式。
 ```java
@@ -1060,7 +1081,9 @@ public void nonstandard(){
 ```
 
 
+
 ##### 3.2.2.3. 设置默认的非标准处理插件
+
 通过向 `application.yaml` 中添加如下选项来设置默认的响应报文处理插件。
 ```yaml
 feign:
@@ -1086,7 +1109,9 @@ feign:
 ```
 
 
+
 #### 3.3.2. 出站报文样例
+
 ```
 2020-06-30 08:45:41.730 DEBUG [192.168.1.190,-] --- [main] com.github.semak.rest.client.logging.outbound :
 3 * Client sent a request on thread main
@@ -1103,7 +1128,9 @@ feign:
 ```
 
 
+
 #### 3.3.3. 入站报文节点配置
+
 > 基于Logback
 
 ```xml
@@ -1113,7 +1140,9 @@ feign:
 ```
 
 
+
 #### 3.3.4. 入站报文样例
+
 ```
 2020-06-30 08:45:41.736 DEBUG [192.168.1.190,-] --- [main] com.github.semak.rest.client.logging.inbound :
 3 * Client received a response on thread main
@@ -1136,7 +1165,9 @@ feign:
 ```
 
 
+
 ### 3.4. SSL证书校验
+
 `semak-rest` 组件为OpenFeign提供了SSL证书校验功能。默认情况下会对**非安全证书**进行报错，可以通过配置方式进行开关。
 
 **配置方式**
@@ -1152,11 +1183,9 @@ feign:
 | --- | --- | --- | --- | --- |
 | **feign.disable-trust-manager** | boolean | 否 | false | 关闭证书校验（默认值**false**为开启证书校验） |
 
-**
+
 ### 3.5. 异常处理
 > 特别注意的是，这里的异常处理机制，是配合服务端标准化或可适配非标准化响应报文来实现的，针对服务端直接抛出的未经处理的异常，由OpenFeign本身的异常处理机制接管，这里不做额外处理。
-
-
 
 为灵活处理客户端异常，`semak-rest` 组件为OpenFeign客户端提量身定制了一套异常处理机制。在默认情况下，客户端在调用服务端出现异常时，会抛出`com.github.semak.rest.core.RestClientException`异常。
 
@@ -1165,62 +1194,69 @@ feign:
 1. 主动抛出异常，自动处理。
 1. 不主动抛异常，手动处理。
 
-
-
 为了满足开发人员对不同异常处理的需求，组件通过一定的设置可以控制客户端异常的抛出机制，改由用户自行处理。需要注意的是，**在手动处理时，需要更加仔细谨慎，在异常链的断裂处做好处理，否则，一旦出错，将无从查究**。
 
 
 那么下面，我们来讲一下两种异常的处理模式。
 
 
+
 #### 3.5.1. 自动处理客户端异常
+
 在没有额外的配置前提下， `semak-rest` 组件会自动处理异常的机制，对返回的报文自动解析，判断异常，并主动抛出 `com.github.semak.rest.core.RestClientException` 异常。
 
+
+
 #### 3.5.2. 手动处理客户端异常
+
 在手动处理异常的机制下，`semak-rest` 组件不会主动抛出异常，开发人员可以从响应报文中自行获取状态信息进行处理。
 
 
 启动手动机制，需要满足下面两点条件：
 
 1. Facade的方法返回类必须为`com.github.semak.commons.model.dto.Response`。如果是非标准的响应类，需要有对应的ReaderPlugin处理插件，并参照 `com.github.semak.rest.core.plugin.client.impl.DefaultReaderPlugin.procFailedResponse` 方法来构建客户端在手动处理异常时的状态。
-1. 在调用基于`OpenFeign`客户端的Facade接口类的方法前，需设置`RestClientContextHolder.Response.disableRethrow()`来**关闭**自动抛出异常的机制。每调用一次Facade接口方法前，都需要显式设置一次 `disableRethrow` 方法。
-```java
-RestClientContextHolder.Response.disableRethrow();
-Response<UserResponse> userResponse = demoFacade.doException("4");
-if (userResponse.getStatus() != 0) {
-    log.error("status: {}, message: {}", userResponse.getStatus(), userResponse.getMessage());
-    Assert.assertTrue(true);
-} else {
-    Assert.fail();
-}
-```
-执行结果：
-```
-2020-06-30 10:39:15.995 DEBUG [192.168.1.190,-] --- [main] com.github.semak.rest.client.logging.outbound :
-1 * Client sent a request on thread main
-1 < OPTIONS http://semak-rest-demo/demo/doException/4 HTTP/1.1
-1 < Accept: application/json
-1 < (0-byte body)
+2. 在调用基于`OpenFeign`客户端的Facade接口类的方法前，需设置`RestClientContextHolder.Response.disableRethrow()`来**关闭**自动抛出异常的机制。每调用一次Facade接口方法前，都需要显式设置一次 `disableRethrow` 方法。
+    ```java
+    RestClientContextHolder.Response.disableRethrow();
+    Response<UserResponse> userResponse = demoFacade.doException("4");
+    if (userResponse.getStatus() != 0) {
+        log.error("status: {}, message: {}", userResponse.getStatus(), userResponse.getMessage());
+        Assert.assertTrue(true);
+    } else {
+        Assert.fail();
+    }
+    ```
+    执行结果：
+    ```
+    2020-06-30 10:39:15.995 DEBUG [192.168.1.190,-] --- [main] com.github.semak.rest.client.logging.outbound :
+    1 * Client sent a request on thread main
+    1 < OPTIONS http://semak-rest-demo/demo/doException/4 HTTP/1.1
+    1 < Accept: application/json
+    1 < (0-byte body)
+    
+    2020-06-30 10:39:16.807 DEBUG [192.168.1.190,-] --- [main] com.github.semak.rest.client.logging.inbound :
+    1 * Client received a response on thread main
+    1 > HTTP/1.1 200 OK (807ms)
+    1 > connection: keep-alive
+    1 > content-type: application/json
+    1 > date: Tue, 30 Jun 2020 02:39:16 GMT
+    1 > has-exception: true
+    1 > transfer-encoding: chunked
+    1 > vary: Origin,Access-Control-Request-Method,Access-Control-Request-Headers
+    1 > (62-byte body)
+    {
+      "status" : -50000,
+      "message" : "Internal Server Error"
+    }
+    2020-06-30 10:39:16.906 INFO  [192.168.1.190,-] --- [main] com.github.semak.rest.test.nacos.client.DemoClientTestcase :>>> userResponse: Response[status=-50000,data=<null>,message=Internal Server Error,rethrowException=false]
+    2020-06-30 10:39:16.918 ERROR [192.168.1.190,-] --- [main] com.github.semak.rest.test.nacos.client.DemoClientTestcase :status: -50000, message: Internal Server Error
+    ```
+    从上面的执行日志可以看出，组件不再显式抛出异常，仅由用户自行处理。
 
-2020-06-30 10:39:16.807 DEBUG [192.168.1.190,-] --- [main] com.github.semak.rest.client.logging.inbound :
-1 * Client received a response on thread main
-1 > HTTP/1.1 200 OK (807ms)
-1 > connection: keep-alive
-1 > content-type: application/json
-1 > date: Tue, 30 Jun 2020 02:39:16 GMT
-1 > has-exception: true
-1 > transfer-encoding: chunked
-1 > vary: Origin,Access-Control-Request-Method,Access-Control-Request-Headers
-1 > (62-byte body)
-{
-  "status" : -50000,
-  "message" : "Internal Server Error"
-}
-2020-06-30 10:39:16.906 INFO  [192.168.1.190,-] --- [main] com.github.semak.rest.test.nacos.client.DemoClientTestcase :>>> userResponse: Response[status=-50000,data=<null>,message=Internal Server Error,rethrowException=false]
-2020-06-30 10:39:16.918 ERROR [192.168.1.190,-] --- [main] com.github.semak.rest.test.nacos.client.DemoClientTestcase :status: -50000, message: Internal Server Error
-```
-从上面的执行日志可以看出，组件不再显式抛出异常，仅由用户自行处理。
+
+
 ### 3.6. 添加请求头
+
 如果在请求发送前，需要在请求头上添加Http Header发送到服务端，可以使用 `semak-rest` 组件提供的 `com.github.semak.rest.core.context.client.RestClientContextHolder.HttpHeader` 来实现。下面，我们看一下如何使用。
 ```java
 RestClientContextHolder.HttpHeader.addHeader("X-H1-ZK1", "ABC");
@@ -1240,6 +1276,7 @@ demoFacade.getUserList(1, 5);
 从上面的日志可以看出，添加的`Http Headers`已经出现在客户端请求中。
 
 
+
 ## 4. 服务治理功能
 
 
@@ -1251,9 +1288,8 @@ demoFacade.getUserList(1, 5);
 
 ### 4.1. 服务注册与发现
 
-
 这里用到的是 `Nacos` 服务中的注册与发现功能，部署好的 `Nacos` 服务如下：
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593493145427-0505b3fd-a55c-48db-abdf-d05cd051ab67.png#align=left&display=inline&height=352&margin=%5Bobject%20Object%5D&name=image.png&originHeight=537&originWidth=2554&size=78524&status=done&style=shadow&width=1673)
+![image.png](.assets/1593493145427-0505b3fd-a55c-48db-abdf-d05cd051ab67.png)
 控制台中的**服务管理-服务列表**功能能看到已注册的服务列表。
 
 
@@ -1280,8 +1316,6 @@ spring:
 
 **配置描述**
 
-
-
 | **属性** | **数据类型** | **必填** | **默认值** | **描述** |
 | --- | --- | --- | --- | --- |
 | **spring.cloud.nacos.discovery.enabled** | boolean | 否 | true | 启动Nacos的服务注册与发现功能 |
@@ -1300,14 +1334,12 @@ spring:
 | **spring.cloud.nacos.discovery.watch.enabled** | boolean | 否 | true | 是否开启Nacos Watch。可以设置成false来关闭watch |
 | **ribbon.nacos.enabled** | boolean | 否 | true | 是否集成Ribbon |
 
-
-
 通过上述样例的配置，我们启动了2个服务实例，可以在控制台上查看：
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593499428916-63b9ee4f-6537-4a2c-95f2-6f7809998d57.png#align=left&display=inline&height=564&margin=%5Bobject%20Object%5D&name=image.png&originHeight=564&originWidth=2550&size=80735&status=done&style=shadow&width=2550)
+![image.png](.assets/1593499428916-63b9ee4f-6537-4a2c-95f2-6f7809998d57.png)
 
 - 我们可以看到启动了2个有效实例，服务名为 `semak-rest-demo` 。
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593499488203-b5376e6f-01a3-4b68-a982-960636fe33d4.png#align=left&display=inline&height=765&margin=%5Bobject%20Object%5D&name=image.png&originHeight=765&originWidth=2538&size=97405&status=done&style=shadow&width=2538)
+  ![image.png](.assets/1593499488203-b5376e6f-01a3-4b68-a982-960636fe33d4.png)
 
 - 点击 `详情` 操作后，我们可以看到注册实例的详细信息。
 - 在有效实例的操作一栏中，可以做实例的实时编辑（权重、是否上限、元数据）和下线动作，都是实时生效的。
@@ -1315,7 +1347,6 @@ spring:
 
 
 #### 4.1.3. 发现服务
-##### 
 ##### 4.1.3.1. 配置方式
 `OpenFeign` 客户端的相关配置添加到应用的 `application.yaml` 中。
 ```yaml
@@ -1377,8 +1408,10 @@ semak-rest-demo:
 这份配置我们可以分解为三个部分来说明。
 
 
+
 **Part1. 基础配置部分**
 基础配置部分相对比较简单，主要包含了 `OpenFeign` 客户端连接到 `Nacos` 服务的地址和一些必要性配置。
+
 ```yaml
 spring:
   main:
@@ -1396,7 +1429,6 @@ spring:
         #group: DEMO
 ```
 **配置描述**
-**
 
 | **属性** | **数据类型** | **必填** | **默认值** | **描述** |
 | --- | --- | --- | --- | --- |
@@ -1457,9 +1489,10 @@ feign:
 - **<feignName>属性**指的是**@FeignClient**注解中的**name**属性。 如果此项值为**default**，则默认为全局的OpenFeign客户端设置属性。
 - **这里需要注意的是**，`feign.client.config.<feignName>.*`属性的生效条件为：使用`@FeignClient注解的url属性`这里，我们简单阐述一下这个配置的失效原因。由于启用服务发现功能时，客户端负载均衡组件`Ribbon`的配置优先，会覆盖掉`Feign`的冲突配置。覆盖的配置我们可以到`Ribbon`中进行配置。
 
-**
+
 **Part2.2. Ribbon全局配置**
 `Ribbon` 作为客户端负载均衡组件，在**启用服务发现功能**时，自动启用，相关配置如下：
+
 ```yaml
 # Ribbon
 # 启用服务发现或listOfServers时有效，在FeignClient上直接配置url，此配置会失效
@@ -1495,7 +1528,7 @@ ribbon:
 - **ribbon.http.client.enabled**的配置出处：`org.springframework.cloud.netflix.ribbon.apache.HttpClientRibbonConfiguration` 中的 `@ConditionalOnProperty(name = "ribbon.httpclient.enabled", matchIfMissing = true)` 。
 - **ribbon.okhttp.enabled**的配置出处 ：`org.springframework.cloud.netflix.ribbon.okhttp.OkHttpRibbonConfiguration` 中的 `@ConditionalOnProperty("ribbon.okhttp.enabled")` 。
 
-**
+
 **关于客户端负载均衡策略的说明**
 
 
@@ -1544,6 +1577,7 @@ public interface DemoFacade {
 ```
 
 
+
 ##### 4.1.3.2. 服务调用方式
 
 
@@ -1566,8 +1600,11 @@ public void getUserList() {
 }
 ```
 输出日志如下：
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593512967205-9a3e3bb5-a29d-433c-ba42-111ffeeac4fc.png#align=left&display=inline&height=551&margin=%5Bobject%20Object%5D&name=image.png&originHeight=551&originWidth=2281&size=178616&status=done&style=shadow&width=2281)
+![image.png](.assets/1593512967205-9a3e3bb5-a29d-433c-ba42-111ffeeac4fc.png)
 从输出的日志来看，通过FeignClient的name，可以在Nacos服务上找到对应服务的服务信息，再进行直连调用。
+
+
+
 ### 4.2. 服务保护
 
 
@@ -1575,8 +1612,6 @@ public void getUserList() {
 
 
 > 整合了 `Nacos Config` 服务的 `Sentinel-Dashboard` 的源码位置（私有仓库）：[https://github.com/manticorecao/sentinel/tree/feature/dashboard-based-nacos/sentinel-dashboard](https://github.com/manticorecao/sentinel/tree/feature/dashboard-based-nacos/sentinel-dashboard)。
-
-
 
 由于 `Sentinel-Dashboard` 服务的搭建不在讨论范围内，故此处不再赘述。
 
@@ -1663,6 +1698,8 @@ spring:
 | **spring.cloud.sentinel.datasource.<ruleName>.nacos.namespace** | String | 否 |  | 命名空间。建议用于环境隔离 |
 | **spring.cloud.sentinel.datasource.<ruleName>.nacos.rule-type** | com.alibaba.cloud.sentinel.datasource.RuleType | 否 |  | 规则类型 |
 
+
+
 **应用配置**
 由于规则的配置都是动态的，所以只要在需要的服务方法上配置 `@SentinelResource` 注解及降级方法等通用属性，规则属性则使用 `sentinel-dashboard` 配置好之后，自动发布到 `Nacos Config` 服务上，再由应用端自动获取到相关规则配置内容，并自动刷新配置。
 
@@ -1692,9 +1729,9 @@ public Response<String> appHelloBlockHandler(String name, BlockException e){
 }
 ```
 
-
 当上述配置完成并启动引用时，我们可以看到 `Sentinel-Dashboard` 上已经将 `semak-rest-demo` 应用实例显示出来：
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593581927674-b30fa233-1db4-4655-9bf2-9e3e13728116.png#align=left&display=inline&height=1272&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1272&originWidth=2550&size=238028&status=done&style=shadow&width=2550)
+![image.png](.assets/1593581927674-b30fa233-1db4-4655-9bf2-9e3e13728116.png)
+
 
 
 #### 4.2.1. 流量控制
@@ -1720,77 +1757,77 @@ Sentinel 并发控制不负责创建和管理线程池，而是**简单统计当
 
 1. 登录Sentinel控制台，点选当前应用，如这里的 `semak-rest-demo` 。在展开的菜单中点选 **流控规则-Nacos** ，这里的规则配置会在此应用的所有服务节点上生效。
 
-      ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593583906006-ca3d0579-8eae-490d-9e44-54496f818a99.png#align=left&display=inline&height=339&margin=%5Bobject%20Object%5D&name=image.png&originHeight=677&originWidth=2551&size=101455&status=done&style=shadow&width=1276)
+   ![image.png](.assets/1593583906006-ca3d0579-8eae-490d-9e44-54496f818a99.png)
 
 2. 点击右上角按钮 **新增流控规则 **，分别配置**资源名**、**阈值类型**和**单机阈值**。配置完成后，点选**新增按钮**，这条规则就在应用服务侧更新完毕了。
 
-      ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593584147513-285b4b67-9365-4b2c-b139-3a1384e3e3dc.png#align=left&display=inline&height=309&margin=%5Bobject%20Object%5D&name=image.png&originHeight=617&originWidth=2547&size=118590&status=done&style=shadow&width=1274)
+   ![image.png](.assets/1593584147513-285b4b67-9365-4b2c-b139-3a1384e3e3dc.png)
 
    - 资源名为 `@SentinelResource` 中的 `value` 属性值。
+
    - 阈值类型选择**线程数**。
+
    - 单机阈值选输入**5**，即同时处理当前资源的线程数不超过5个。
 
-      ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593585057441-a4e24766-6d70-4523-a7ce-0f211e8f4c08.png#align=left&display=inline&height=55&margin=%5Bobject%20Object%5D&name=image.png&originHeight=110&originWidth=2440&size=77645&status=done&style=shadow&width=1220)
+     ![image.png](.assets/1593585057441-a4e24766-6d70-4523-a7ce-0f211e8f4c08.png)
 
 3. 基于上面应用配置的样例，我们执行一次 `curl -X GET "http://localhost:8080/demo/appHello/sleep" -H "accept: application/json"` ，返回结果如下：
 
-      ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593585166020-7bc19cb2-6618-45b8-85ff-a12b4ab2e7d8.png#align=left&display=inline&height=73&margin=%5Bobject%20Object%5D&name=image.png&originHeight=146&originWidth=1232&size=21900&status=done&style=shadow&width=616)
-然后，我们分出6个会话窗口同时执行，让 `demoFacade.appHello` 占满5个以上线程，就会发现，其中一个会话窗口的返回的报文内容为降级后的输出，故其请求的流量被拒绝了。
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593585643907-69126423-85fd-4d1f-90b0-fa5e11b95bee.png#align=left&display=inline&height=681&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1361&originWidth=2556&size=149889&status=done&style=shadow&width=1278)
-查看 `Sentinel` 控制台的实时监控，的确也是如此。通过5个QPS，拒绝了1个QPS。
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593585522102-95227b8e-7df6-45dd-b81f-fb56fe65723d.png#align=left&display=inline&height=518&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1035&originWidth=2547&size=166875&status=done&style=shadow&width=1274)
+   <img src="https://cdn.nlark.com/yuque/0/2020/png/1241873/1593585166020-7bc19cb2-6618-45b8-85ff-a12b4ab2e7d8.png" alt="image.png" style="zoom:70%;" />
+   然后，我们分出6个会话窗口同时执行，让 `demoFacade.appHello` 占满5个以上线程，就会发现，其中一个会话窗口的返回的报文内容为降级后的输出，故其请求的流量被拒绝了。
+   ![image.png](.assets/1593585643907-69126423-85fd-4d1f-90b0-fa5e11b95bee.png)
+   查看 `Sentinel` 控制台的实时监控，的确也是如此。通过5个QPS，拒绝了1个QPS。
+   ![image.png](.assets/1593585522102-95227b8e-7df6-45dd-b81f-fb56fe65723d.png)
+
 
 
 ##### 4.2.1.2. QPS流量控制
+
 和并发线程数控制不同，5个并发线程如果每个处理效率不同，其QPS是不定的。有时候，为了更精确的控制QPS，需要用到QPS的流量控制规则。
 
 所谓QPS流量控制，就是当QPS超过某个阈值的时候，则采取措施进行流量控制。流量控制的效果包括以下几种：**直接拒绝**、**Warm Up**、**匀速排队**。
 
 
-
-
 1. **直接拒绝**方式是默认的流量控制方式，当QPS超过任意规则的阈值后，新的请求就会被立即拒绝，拒绝方式为抛出`FlowException`。这种方式适用于对系统处理能力确切已知的情况下，比如通过压测确定了系统的准确水位时。
-
-
 
 2. **Warm Up**方式，即预热/冷启动方式。当系统长期处于低水位的情况下，当流量突然增加时，直接把系统拉升到高水位可能瞬间把系统压垮。通过"冷启动"，让通过的流量缓慢增加，在一定时间内逐渐增加到阈值上限，给冷系统一个预热的时间，避免冷系统被压垮。通常冷启动的过程系统允许通过的 QPS 曲线如下图所示：
 
-     ![](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593586024497-645fa6a6-5bcd-4f01-ad3f-73dbba5af974.png#align=left&display=inline&height=489&margin=%5Bobject%20Object%5D&originHeight=489&originWidth=567&size=0&status=done&style=shadow&width=567)
-简单来说，默认 `coldFactor` 为 3，即请求 QPS 从 `threshold / 3` 开始，经预热时长逐渐升至设定的 QPS 阈值。更详细的文档可以参考 [流量控制 - Warm Up](https://github.com/alibaba/Sentinel/wiki/%E9%99%90%E6%B5%81---%E5%86%B7%E5%90%AF%E5%8A%A8)。
-
+        ![](.assets/1593586024497-645fa6a6-5bcd-4f01-ad3f-73dbba5af974.png)
+   简单来说，默认 `coldFactor` 为 3，即请求 QPS 从 `threshold / 3` 开始，经预热时长逐渐升至设定的 QPS 阈值。更详细的文档可以参考 [流量控制 - Warm Up](https://github.com/alibaba/Sentinel/wiki/%E9%99%90%E6%B5%81---%E5%86%B7%E5%90%AF%E5%8A%A8)。
 
 3. **匀速排队**方式，会严格控制请求通过的间隔时间，也即是让请求以均匀的速度通过，对应的是漏桶算法。详细文档可以参考 [流量控制 - 匀速器模式](https://github.com/alibaba/Sentinel/wiki/%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6-%E5%8C%80%E9%80%9F%E6%8E%92%E9%98%9F%E6%A8%A1%E5%BC%8F)。该方式的作用如下图所示：
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593586851915-9d582b4f-d207-440a-aaf9-ec611f589181.png#align=left&display=inline&height=216&margin=%5Bobject%20Object%5D&name=image.png&originHeight=288&originWidth=792&size=26583&status=done&style=shadow&width=594)
-这种方式主要用于处理间隔性突发的流量，例如消息队列。想象一下这样的场景，在某一秒有大量的请求到来，而接下来的几秒则处于空闲状态，我们希望系统能够在接下来的空闲期间逐渐处理这些请求，而不是在第一秒直接拒绝多余的请求。
-
+   ![image.png](.assets/1593586851915-9d582b4f-d207-440a-aaf9-ec611f589181.png)
+   这种方式主要用于处理间隔性突发的流量，例如消息队列。想象一下这样的场景，在某一秒有大量的请求到来，而接下来的几秒则处于空闲状态，我们希望系统能够在接下来的空闲期间逐渐处理这些请求，而不是在第一秒直接拒绝多余的请求。
 
 **配置QPS的流控规则的步骤：**
-**
+
 > 此处样例仅以**直接拒绝**的流控效果做演示，其他流控效果，请同学们自己查阅官方文档，进行调试，这里就不再赘述了。
-
-
 
 1. 登录Sentinel控制台，点选当前应用，如这里的 `semak-rest-demo` 。在展开的菜单中点选 **流控规则-Nacos** ，这里的规则配置会在此应用的所有服务节点上生效。
 
-      ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593583906006-ca3d0579-8eae-490d-9e44-54496f818a99.png#align=left&display=inline&height=339&margin=%5Bobject%20Object%5D&name=image.png&originHeight=677&originWidth=2551&size=101455&status=done&style=shadow&width=1276)
+   ![image.png](.assets/1593583906006-ca3d0579-8eae-490d-9e44-54496f818a99-20210902171448727.png)
 
 2. 点击右上角按钮 **新增流控规则 **，分别配置**资源名**、**阈值类型**和**单机阈值**，高级选型保持默认即可。配置完成后，点选**新增按钮**，这条规则就在应用服务侧更新完毕了。
 
-      ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593587103439-17f7fdf6-a968-4ccc-afc4-919104486905.png#align=left&display=inline&height=349&margin=%5Bobject%20Object%5D&name=image.png&originHeight=698&originWidth=2545&size=137890&status=done&style=shadow&width=1273)
+   ![image.png](.assets/1593587103439-17f7fdf6-a968-4ccc-afc4-919104486905.png)
 
-   - 资源名为 `@SentinelResource` 中的 `value` 属性值。
-   - 阈值类型选择期望设置的QPS值。
-   - 单机阈值选输入**150**，即150QPS。
+   * 资源名为 `@SentinelResource` 中的 `value` 属性值。
 
-      ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593587483397-0f9effc0-4152-4c56-8aaa-27eee0263bba.png#align=left&display=inline&height=56&margin=%5Bobject%20Object%5D&name=image.png&originHeight=111&originWidth=2452&size=77662&status=done&style=none&width=1226)
+   * 阈值类型选择期望设置的QPS值。
+
+   * 单机阈值选输入**150**，即150QPS。
+
+     ![image.png](.assets/1593587483397-0f9effc0-4152-4c56-8aaa-27eee0263bba.png)
 
 
 3. 基于上面应用配置的样例，我们用JMeter进行一次60秒的接口压力测试，并发数为2，测试报告如下：
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593588872934-e945a0ea-164e-422d-9c8d-5c79f4833830.png#align=left&display=inline&height=158&margin=%5Bobject%20Object%5D&name=image.png&originHeight=211&originWidth=1546&size=40180&status=done&style=shadow&width=1160)
-按照整体吞吐量（QPS）和错误比率来算，大致的QPS应该是 `3041.5*(1-0.9502)=151.4667` ，折算部分损耗，十分接近我们所设定的150QPS的值了。再查看 `Sentinel` 控制台的实时监控，整个压测过程通过150个QPS，拒绝了2000~3000+个QPS，数据与测试报告基本吻合。
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593588817167-1759f432-ee30-4597-b247-ecaaa8048454.png#align=left&display=inline&height=524&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1048&originWidth=2543&size=204229&status=done&style=shadow&width=1272)
+   ![image.png](.assets/1593588872934-e945a0ea-164e-422d-9c8d-5c79f4833830.png)
+   按照整体吞吐量（QPS）和错误比率来算，大致的QPS应该是 `3041.5*(1-0.9502)=151.4667` ，折算部分损耗，十分接近我们所设定的150QPS的值了。再查看 `Sentinel` 控制台的实时监控，整个压测过程通过150个QPS，拒绝了2000~3000+个QPS，数据与测试报告基本吻合。
+
+   ![image.png](.assets/1593588817167-1759f432-ee30-4597-b247-ecaaa8048454.png)
+
 
 
 #### 4.2.2. 熔断降级
@@ -1808,8 +1845,6 @@ Sentinel 并发控制不负责创建和管理线程池，而是**简单统计当
 - **平均响应时间**：当 1s 内持续进入 N 个请求，对应时刻的平均响应时间（秒级）均超过阈值（以 ms 为单位），那么在接下的时间窗口（以 s 为单位）之内，对这个方法的调用都会自动地熔断（抛出 `DegradeException`）。注意 Sentinel 默认统计的 RT（响应时间） 上限是 4900 ms，**超出此阈值的都会算作 4900 ms**，若需要变更此上限可以通过启动配置项 `-Dcsp.sentinel.statistic.max.rt=xxx` 来配置。
 - **异常比例**：当资源的每秒请求量 >= N（可配置），并且每秒异常总数占通过量的比值超过阈值之后，资源进入降级状态，即在接下的时间窗口（以 s 为单位）之内，对这个方法的调用都会自动地返回。异常比率的阈值范围是 `[0.0, 1.0]`，代表 0% - 100%。
 - **异常数**：当资源近 1 分钟的异常数目超过阈值之后会进行熔断。注意由于统计时间窗口是分钟级别的，若 `timeWindow` 小于 60s，则结束熔断状态后仍可能再进入熔断状态。
-
-
 
 需要注意的是，在下面这段样例代码中，我们可以发现两个降级处理方法，即 `blockHandler` 指向的 `appHelloBlockHandler` 和 `fallback` 指向的 `appHelloFallback` 。
 ```java
@@ -1843,45 +1878,40 @@ public Response<String> appHelloBlockHandler(String name, BlockException e){
 
 
 **配置RT降级策略的步骤：**
-**
+
 > 此处样例仅以**RT降级策略**的降级效果做演示，模拟服务调用超时情况。其他策略，请同学们自己查阅官方文档，进行调试，这里就不再赘述了。
-
-
 
 1. 在没有RT降级规则的情况下，用JMeter调用一个会休眠2秒的方法，2个并发调用60秒的测试报告如下：
 
-     ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593593675934-74593b13-06fc-4b7c-8667-b995b20ffc05.png#align=left&display=inline&height=160&margin=%5Bobject%20Object%5D&name=image.png&originHeight=214&originWidth=1547&size=38473&status=done&style=shadow&width=1160)
-虽然QPS非常低，只有 `59.4/60=0.99` ，但是没有任何错误。这样的话，在并发更高的情况下，会耗尽应用资源。
+   ![image.png](.assets/1593593675934-74593b13-06fc-4b7c-8667-b995b20ffc05.png)
+   虽然QPS非常低，只有 `59.4/60=0.99` ，但是没有任何错误。这样的话，在并发更高的情况下，会耗尽应用资源。
 
 2. 那么，现在我们要为这个方法设置一个RT降级规则。登录Sentinel控制台，点选当前应用，如这里的 `semak-rest-demo` 。在展开的菜单中点选 **降级规则** ，这里的规则配置会在此应用的所有服务节点上生效。
 
-     ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593593409033-cb6ed444-4e4b-42eb-8154-6bc5fceca877.png#align=left&display=inline&height=308&margin=%5Bobject%20Object%5D&name=image.png&originHeight=615&originWidth=2543&size=95679&status=done&style=shadow&width=1272)
+   ![image.png](.assets/1593593409033-cb6ed444-4e4b-42eb-8154-6bc5fceca877.png)
 
 
 3. 点击右上角按钮 **新增降级规则 **，分别配置**资源名**、**降级策略、RT**和**时间窗口**。配置完成后，点选**新增按钮**，这条规则就在应用服务侧更新完毕了。
 
-     ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593594100000-2efca22b-334f-4b2c-b857-857d7308f2d0.png#align=left&display=inline&height=338&margin=%5Bobject%20Object%5D&name=image.png&originHeight=675&originWidth=2544&size=116486&status=done&style=shadow&width=1272)
+   ![image.png](.assets/1593594100000-2efca22b-334f-4b2c-b857-857d7308f2d0-20210902172111487.png)
 
-   - 资源名为 `@SentinelResource` 中的 `value` 属性值。
-   - 降级策略选择RT-响应时间。
-   - RT值设置为100ms。
-   - 时间窗口设置为5秒。
+   * 资源名为 `@SentinelResource` 中的 `value` 属性值。
+   * 降级策略选择RT-响应时间。
+   * RT值设置为100ms。
+   * 时间窗口设置为5秒。
+
 4. 在配置好RT降级规则的情况下，再用JMeter调用一个会休眠2秒的方法，2个并发调用60秒的测试报告如下，我们用响应时间的聚合图表看起来会更加直观：
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593595014098-855421c4-3791-4a9d-aae3-716ef916279c.png#align=left&display=inline&height=807&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1076&originWidth=1544&size=113548&status=done&style=shadow&width=1158)
+   ![image.png](.assets/1593595014098-855421c4-3791-4a9d-aae3-716ef916279c.png)
 
    - 上图**红色箭头**指向的波峰响应时间较大，说明正在正常调用服务，但服务响应慢。
    - 上图**绿色箭头**指向的波谷响应时间极小，说明触发了RT降级规则，服务进入了熔断的时间窗口，直接返回了降级的响应报文。
 
-
-
 再查看Sentinel控制台的实时监控图形如下：
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1593594973779-4a03c688-599a-470c-bbbb-871a59986291.png#align=left&display=inline&height=526&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1051&originWidth=2548&size=217585&status=done&style=shadow&width=1274)
+![image.png](.assets/1593594973779-4a03c688-599a-470c-bbbb-871a59986291.png)
 
    - 上图**绿色箭头**指向的波谷响QPS全部通过，说明正在正常调用服务，但服务响应慢。
    - 上图**红色箭头**指向的波峰为拒绝的QPS，说明触发了RT降级规则，服务进入了熔断的时间窗口，直接返回了降级的响应报文。
-
-
 
 在设置了RT降级规则的情况下，测试报告和控制台监控的数据也是高度吻合。

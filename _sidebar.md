@@ -16,4 +16,5 @@
   * [semak-stream](通用组件/semak-stream.md)
   * [semak-elastic-job](通用组件/semak-elasticjob.md)
   * [semak-config](通用组件/semak-config.md)
+  * [semak-rest](通用组件/semak-rest.md)
 

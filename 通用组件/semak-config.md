@@ -414,19 +414,13 @@ $ curl http://localhost:8080/test
 
 
 1. 在 `配置管理` -> `配置列表` 中选择 Data Id为`semak-config-demo-dev.yaml`的配置项，在操作列点击`更多`，打开`历史版本`列表。
-
-
    ![image.png](.assets/1592357184452-92b8d448-eeab-4066-9e8c-c6f5b92c166f.png)
 
 2. 选择需要回滚的版本，点击`回滚`操作。
-
-
    ![image.png](.assets/1592357201134-eb4c32ff-d77e-4b3f-ae45-94147224664e.png)
 
 3. 核对所有项后，点击`回滚配置`按钮，再次确认后，即可将配置回滚到当前版本。此时，应用接收到配置变更通知后，会立刻刷新配置值。
-
-
-   ![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1592357217493-01bc5630-668b-471e-9d9e-38b68670b615.png)
+   ![image.png](.assets/1592357217493-01bc5630-668b-471e-9d9e-38b68670b615.png)
 
 
 
