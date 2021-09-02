@@ -12,4 +12,6 @@
   * [semak-druid](通用组件/semak-druid.md)
   * [semak-mybatis](通用组件/semak-mybatis.md)
   * [semak-sharding-jdbc](通用组件/semak-sharding-jdbc.md)
+  * [semak-redis](通用组件/semak-redis.md)
+  * [semak-stream](通用组件/semak-stream.md)
 

@@ -1,3 +1,5 @@
+# semak-stream
+
 `semak-stream` 基于 `spring-cloud-stream` 进行构建，目前主要适配的中间绑定器（Binder）为：
 
 - RabbitMQ
@@ -17,38 +19,49 @@
 
 ## 1. 应用模型结构
 
-
 下图是官方文档中对于**Spring Cloud Stream**应用模型的结构图。从中我们可以看到，**Spring Cloud Stream**构建的应用程序与消息中间件之间是通过绑定器**Binder**相关联的，绑定器对于应用程序而言起到了隔离作用，它使得不同消息中间件的实现细节对应用程序来说是透明的。所以对于每一个**Spring Cloud Stream**的应用程序来说，它不需要知晓消息中间件的通信细节，它只需要知道**Binder**对应用程序提供的概念去实现即可，也就是消息通道：**Channel**。如下图案例，在**应用程序**和**Binder**之间定义了两条输入通道和三条输出通道来传递消息，而**绑定器**则是作为这些通道和消息中间件之间的**桥梁**进行通信。
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1595312444808-9099252f-5e68-44fb-9342-ef6419bbba5e.png#align=left&display=inline&height=330&margin=%5Bobject%20Object%5D&name=image.png&originHeight=330&originWidth=433&size=22394&status=done&style=none&width=433)
+
+![image.png](.assets/1595312444808-9099252f-5e68-44fb-9342-ef6419bbba5e.png)
+
 
 
 ## 2. 核心概念
+
 ### 2.1. 绑定器
-**
 **Binder**绑定器是**Spring Cloud Stream**中一个非常重要的概念。在没有绑定器这个概念的情况下，我们的**Spring Boot**应用要直接与消息中间件进行信息交互的时候，由于各消息中间件构建的初衷不同，它们的实现细节上会有较大的差异性，这使得我们实现的消息交互逻辑就会非常笨重，因为对具体的中间件实现细节有太重的依赖，当中间件有较大的变动升级、或是更换中间件的时候，我们就需要付出非常大的代价来实施。
 
 
 通过定义绑定器作为中间层，完美地实现了应用程序与消息中间件细节之间的隔离。通过向应用程序暴露统一的**Channel**通道，使得应用程序不需要再考虑各种不同的消息中间件实现。当我们需要升级消息中间件，或是更换其他消息中间件产品时，我们要做的就是更换它们对应的**Binder**绑定器而不需要修改任何**Spring Boot**的应用逻辑。
+
+
+
 ### 2.2. 发布-订阅模式
 
 
 在**Spring Cloud Stream**中的消息通信方式遵循了**发布-订阅模式**，当一条消息被投递到消息中间件之后，它会通过共享的**Topic**主题进行广播，消息消费者在订阅的主题中收到它并触发自身的业务逻辑处理。这里所提到的**Topic**主题是**Spring Cloud Stream**中的一个抽象概念，用来代表发布共享消息给消费者的地方。在不同的消息中间件中，**Topic**可能对应着不同的概念，比如：在**RabbitMQ**中的它对应了**Exchange**、而在**Kakfa**中则对应了**Kafka**中的**Topic**。
 
-
 相对于点对点队列实现的消息通信来说，**Spring Cloud Stream**采用的**发布-订阅模式**可以有效的降低消息生产者与消费者之间的耦合，当我们需要对同一类消息增加一种处理方式时，只需要增加一个应用程序并将输入通道绑定到既有的**Topic**中就可以实现功能的扩展，而不需要改变原来已经实现的任何内容。
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1595312529726-87e85ca3-615c-4b29-ad67-a8da689f6055.png#align=left&display=inline&height=445&margin=%5Bobject%20Object%5D&name=image.png&originHeight=445&originWidth=569&size=18583&status=done&style=none&width=569)
+
+![image.png](.assets/1595312529726-87e85ca3-615c-4b29-ad67-a8da689f6055.png)
+
+
+
 ### 2.3. 消费组
 
 
 虽然**Spring Cloud Stream**通过**发布-订阅模式**将消息生产者与消费者做了很好的解耦，基于相同主题的消费者可以轻松的进行扩展，但是这些扩展都是针对不同的应用实例而言的，在现实的微服务架构中，我们每一个微服务应用为了实现高可用和负载均衡，实际上都会部署`多个实例`。很多情况下，消息生产者发送消息给某个具体微服务时，`只希望被消费一次`。为了解决这个问题，在**Spring Cloud Stream**中提供了消费组的概念。
 
-
 如果在同一个主题上的应用需要启动多个实例的时候，我们可以通过`spring.cloud.stream.bindings.``<channelName>``.group`属性为应用指定一个组名，这样这个应用的多个实例在接收到消息的时候，只会有一个成员真正的收到消息并进行处理。如下图所示，我们为Service-A和Service-B分别启动了两个实例，并且根据服务名进行了分组，这样当消息进入主题之后，Group-A和Group-B都会收到消息的副本，但是在两个组中都只会有一个实例对其进行消费。
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1595312568333-3a71f301-f86d-4445-9dd8-8f1212281019.png#align=left&display=inline&height=496&margin=%5Bobject%20Object%5D&name=image.png&originHeight=496&originWidth=620&size=22056&status=done&style=none&width=620)
+
+![image.png](.assets/1595312568333-3a71f301-f86d-4445-9dd8-8f1212281019.png)
+
 > 需要注意的是，当定义**group**时，队列名称将被设置为`${destination}.${group}`。以RabbitMQ为例，当Exchange对应的`destination`值为`demo.dest1`、`group`值为`biz1.q`，那么实际在RabbitMQ中定义的完整队列名称为：`demo.dest1.biz.q`。
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1595312578377-c38d6ffb-6da5-468c-94e5-b8ec89f391e3.png#align=left&display=inline&height=307&margin=%5Bobject%20Object%5D&name=image.png&originHeight=307&originWidth=813&size=42426&status=done&style=none&width=813)
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1595312583766-1d8455dc-c1bb-4a99-9948-b6233f6ee184.png#align=left&display=inline&height=311&margin=%5Bobject%20Object%5D&name=image.png&originHeight=311&originWidth=895&size=39875&status=done&style=none&width=895)
+![image.png](.assets/1595312578377-c38d6ffb-6da5-468c-94e5-b8ec89f391e3.png)
+![image.png](.assets/1595312583766-1d8455dc-c1bb-4a99-9948-b6233f6ee184.png)
+
+
+
 ### 2.4. 消息分区
 
 
@@ -59,6 +72,7 @@
 
 
 **Spring Cloud Stream**为分区提供了通用的抽象实现，用来在消息中间件的上层实现分区处理，所以它对于消息中间件自身是否实现了消息分区并不关心，这使得**Spring Cloud Stream**为不具备分区功能的消息中间件也增加了分区功能扩展。
+
 
 
 ## 3. 先决条件
@@ -85,7 +99,9 @@
 ```
 
 
+
 #### 3.2.2. 适配RocketMQ
+
 ```xml
 <dependency>
     <groupId>com.github.semak.stream</groupId>
@@ -95,7 +111,9 @@
 ```
 
 
+
 #### 3.2.3. 适配Kafka
+
 ```xml
 <dependency>
     <groupId>com.github.semak.stream</groupId>
@@ -103,6 +121,7 @@
     <version>最新RELEASE版本</version>
 </dependency>
 ```
+
 
 
 ## 4. 绑定器与消息通道的配置
@@ -142,7 +161,7 @@ spring:
           #queue name = ${destination}.${group}
           group: biz.q
 ```
-### 
+
 ### 4.2. 属性描述
 | **属性** | **是否必填** | **默认值** | **描述** |
 | :--- | :--- | :--- | :--- |
@@ -176,9 +195,9 @@ spring:
 
 > 由于属性较多，下面将给出官方文档指定章节的连接。
 
-
-
 除了通用属性外，还有一些中间件相关的特有配置。
+
+
 
 
 #### 4.3.1. RabbitMQ专有属性
@@ -219,7 +238,7 @@ public interface DemoSource {
     MessageChannel output();
 }
 ```
-#### 
+
 #### 5.1.2. 配置通道绑定
 ```yaml
 spring:
@@ -236,7 +255,10 @@ spring:
 ```
 这里将定义好的输出通道`demoOutput`绑定到绑定器`bizRabbit`上，`destination`指定到交换器名称，`group`指定到队列名称后缀（队列名称完整名称由`destination + . + group`构成）。
 
+
+
 #### 5.1.3. 发送消息
+
 我们可以定义一个基于通道的发送器。
 ```java
 @EnableBinding(DemoSource.class)
@@ -260,8 +282,6 @@ public class DemoSourceSender {
 - 需要通过类注解`@EnableBinding`开启通道绑定。
 - 引用`DemoSource`通道进行发送。
 
-
-
 然后再业务代码中引用发送器发送消息。
 ```java
 @Autowired
@@ -272,7 +292,7 @@ private DemoSourceSender demoSourceSender;
 demoSourceSender.send(userRequest);
 ```
 这样，一条消息就被发送到队列中了。
-### 
+
 ### 5.2. 消费者定义
 #### 5.2.1. 定义输入通道
 ```java
@@ -284,7 +304,7 @@ public interface DemoSink {
     SubscribableChannel input();
 }
 ```
-#### 
+
 #### 5.2.2. 配置通道绑定
 ```yaml
 spring:
@@ -299,6 +319,7 @@ spring:
           #queue name = destination + . + group
           group: biz1.q
 ```
+
 
 
 #### 5.2.3. 监听消息

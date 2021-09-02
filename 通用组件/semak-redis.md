@@ -1,3 +1,5 @@
+# semak-redis
+
 `semak-redis`提供Key-Value风格的数据存储组件，基于`spring-data-redis`项目进行了扩展和增强。 其主要特性包括：
 
 
@@ -39,6 +41,7 @@
 ```
 
 
+
 ## 2. 客户端定义
 
 
@@ -64,6 +67,7 @@ spring:
 
 
 如上配置，`pri-redis`即表示指定了一个Spring Bean Name为`pri-redis`的Bean，会在后续客户端详细属性定义中进行匹配。
+
 
 
 ### 2.2. 客户端基本（父）属性定义
@@ -119,6 +123,7 @@ spring:
 ```
 
 
+
 ### 2.3. 客户端基本（父）属性描述
 
 
@@ -155,7 +160,7 @@ spring:
 | **retry-policy.exponential-back-off-policy.max-interval-in-millis** | 否 | 30000 | 退避周期最大值（单位：毫秒） |
 | **retry-policy.exponential-back-off-policy.multiplier** | 否 | 2 | 乘数 |
 
-### 
+
 ### 2.4. 客户端专有属性定义
 
 
@@ -176,6 +181,7 @@ spring:
       port: 6379
       password: ENC(6tqzYkJGBbg+s5nK08DtEA==)
 ```
+
 
 
 #### 2.4.2. 独立模式（Standalone）属性描述
@@ -207,6 +213,7 @@ spring:
         - "192.168.23.158:26379"
       password: ENC(6tqzYkJGBbg+s5nK08DtEA==)
 ```
+
 
 
 #### 2.4.4. 哨兵模式（Sentinel）属性描述
@@ -243,6 +250,7 @@ spring:
 ```
 
 
+
 #### 2.4.6. 集群模式（Cluster）属性描述
 
 
@@ -274,6 +282,7 @@ spring:
         session-timeout-in-millis: 30000
       password: ENC(mv+UiKUaQO9cC9Q0/w5AWQ==)
 ```
+
 
 
 #### 2.4.8. Codis属性描述
@@ -385,6 +394,7 @@ spring:
 ```
 
 
+
 ## 3. 密码加密方式
 
 
@@ -409,6 +419,7 @@ jasypt:
 这里的`password`属性类似于盐。
 
 
+
 ## 4. 客户端使用方式
 
 
@@ -422,9 +433,8 @@ jasypt:
 - CodisClient接口：用于连接Codis集群服务，屏蔽了会造成服务端阻塞的方法、有执行风险的方法和[Codis不支持的命令](https://github.com/CodisLabs/codis/blob/release3.2/doc/unsupported_cmds.md)。
 - UnsafeRedisClient接口：包含了接近于RedisTemplate的命令集，不建议使用。
 
-
-
 接口的定义，摒除了大部分风险，也去除了部分冗余，使得Redis客户端使用起来更加轻便。
+
 
 
 ### 4.2. 客户端使用
@@ -507,6 +517,7 @@ log.info("Size after pop: {}", boundListOperations.size());
 ```
 
 
+
 #### 4.2.3. 基于Pipeline的数据操作方法
 
 
@@ -549,14 +560,13 @@ public void pipeline() {
 
 - 使用RedisConnection直接操作的情况下，前缀属性（key-prefix）不会在key上进行附加。
 
-
-
 输出日志：
 
 
 ```
 Pipelined values: [1198692483339504511, 7517350612423976356, -234680408832128525, -1385247499640218210, and more...
 ```
+
 
 
 #### 4.2.4. 事务操作方式
@@ -593,6 +603,7 @@ Get value after transaction: true
 ```
 
 
+
 ## 5. 使用注解操作缓存
 
 
@@ -613,9 +624,8 @@ spring:
 通过设置`spring.cache.enabled`为`true`，`spring.cache.type`为`redis`来启用Redis Caching的相关注解。
 
 
+
 ### 5.2. Caching属性描述
-
-
 
 | **属性** | **是否必填** | **默认值** | **描述** |
 | :--- | :--- | :--- | :--- |
@@ -626,7 +636,7 @@ spring:
 | **spring.cache.redis.use-key-prefix** | 否 | true | 启用key前缀 |
 | **spring.cache.redis.time-to-live** | 否 | none | 缓存过期时间，参考 `java.time.Duration` 类的注释举例来定义标准值。 |
 
-### 
+
 ### 5.3. 使用指定的cacheManager
 
 
@@ -664,6 +674,7 @@ public class CacheTemplate {
 特别说明，这里的`sync`属性，主要是在多线程环境下，某些操作可能使用相同参数同步调用。默认情况下，缓存不锁定任何资源，可能导致多次计算，而违反了缓存的目的。对于这些特定的情况，属性`sync`可以指示底层将缓存锁住，使只有一个线程可以进入计算，而其他线程堵塞，直到返回结果更新到缓存中。
 
 
+
 ## 6. 需要注意的问题
 
 
@@ -682,9 +693,9 @@ Redis的库（database）更多地是做为命名空间（namespace），且使�
 
 > With DB numbers, with a default of a few DBs, we are communication better what this feature is and how can be used I think. I hope that at some point we can drop the multiple DBs support at all, but I think it is probably too late as there is a number of people relying on this feature for their work.
 
-
-
 所以，基于此原因，组件在设计的时候使用了`key-prefix`属性来为key添加前缀，而这里建议将`key-prefix`设置为你应用的名称（即`spring.application.name`）。之后，当你在通过提供的接口操作Redis命令时，会对key进行自动附加，比如：你添加了`demo:vs:one`，那么，实际存入到Redis服务端的可以是：`你的应用名称:demo:vs:one`，反之亦然。这里需要注意的是，当使用了RedisConnection时，此前缀无法附加在key上。
+
+
 
 
 ### 6.2. RedisCallback 与 SessionCallback 的使用建议
@@ -701,6 +712,7 @@ Redis的库（database）更多地是做为命名空间（namespace），且使�
 订阅与发布的功能，将以 [Spring Cloud Stream Binder](https://github.com/spring-cloud/spring-cloud-stream-binder-redis) 的形式，在消息中间件中提供。
 
 
+
 ### 6.4. Hash Tags
 
 
@@ -708,8 +720,6 @@ Hash Tags的作用是将一批含有其标记的Key设置到同一台Redis主机
 
 
 在使用**Codis**时，建议在以下半支持（half-supported）的命令上使用（Redis Cluster不需要）。
-
-
 
 | **命令类型** | **命令名称** |
 | :---: | :--- |
@@ -725,8 +735,6 @@ Hash Tags的作用是将一批含有其标记的Key设置到同一台Redis主机
 | HyperLogLog | PFMERGE |
 | Scripting | EVAL |
 |  | EVALSHA |
-
-
 
 具体写法：
 
@@ -754,6 +762,7 @@ Assert.assertTrue(d2Set != null && d2Set.size() == 2 && d2Set.contains("n") && d
 假设hash算法为sha1(str)方法。对user:{user1}:ids和user:{user1}:tweets，其hash值都等同于`sha1(user1)`。
 
 
+
 ### 6.5. RedisClient的转换
 
 
@@ -773,5 +782,4 @@ public class RedisXxxConfiguration {
     }
 }
 ```
-
 
