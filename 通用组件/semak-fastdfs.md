@@ -1,3 +1,5 @@
+# semak-fastfds
+
 `semak-fastdfs` 基于分布式文件存储服务FastDFS提供的客户端组件，其主要特性包括：
 
 
@@ -46,9 +48,11 @@ spring:
 ```
 
 
+
 ### 2.1. 属性描述
+
 | **属性** | **数据类型** | **必填** | **默认值** | **描述** |
-| :---: | :---: | :---: | :---: | :---: |
+| :---- | :---- | :---- | :---- | :---- |
 | **spring.fastdfs.enabled** | boolean | 否 | true | 是否启用fastdfs的客户端 |
 | **spring.fastdfs.connect-timeout-in-ms** | int | 否 | 5000 | 连接超时（单位：ms） |
 | **spring.fastdfs.network-timeout-in-ms** | int | 否 | 30000 | 响应超时（单位：ms） |
@@ -101,7 +105,9 @@ public void upload() throws IOException {
 ```
 
 
+
 ### 3.2. 获取文件
+
 ```java
 @Autowired
 private FdfsClient fdfsClient;
@@ -119,7 +125,9 @@ public void getFile() throws Exception {
 此处获取成功文件后，会将文件写入到指定位置。
 
 
+
 ### 3.3. 获取文件的下载链接（防盗链）
+
 ```java
 @Autowired
 private FdfsClient fdfsClient;
@@ -165,7 +173,9 @@ public void getFileInfo() {
 ```
 
 
+
 ### 3.5. 删除文件
+
 ```java
 @Autowired
 private FdfsClient fdfsClient;
@@ -178,6 +188,7 @@ public void removeFile(){
     }
 }
 ```
+
 
 
 ## 4. 结合SpringMVC的使用方式
@@ -226,7 +237,9 @@ public Response<String> uploadFile(@RequestParam MultipartFile file, @RequestPar
 ```
 
 
+
 ### 4.2. 下载文件
+
 ```java
 @GetMapping("/download")
 public Response<String> downloadFile() {

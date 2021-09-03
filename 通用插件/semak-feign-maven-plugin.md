@@ -1,3 +1,5 @@
+# semak-feign-maven-plugin
+
 一般来说，作为服务提供方，特别是作为服务治理生态中的服务提供方，除了本身开放的服务之外，还需要提供给**调用方**有效的服务调用方式。在基于Spring Cloud的生态中，我们会使用`Feign`作为服务调用时的客户端，它会对接口进行代理并调用**服务方**。
 
 
@@ -42,6 +44,7 @@
 ```
 
 
+
 ## 2. 插件配置
 
 
@@ -81,6 +84,7 @@
 为了构建客户端自动代理接口，需要从标识为`FACADE`的模块提取接口类及实现类（注解渲染相关），从标识为`DTO`的模块提取数据传输对象类，经处理配置后，将源代码生成到标识为`DESTINATION`的目标模块，最终编译打包，提供给客户端使用（自动配置）。
 
 
+
 ## 3. 插件配置描述
 
 
@@ -90,13 +94,10 @@
 | :--- | :--- | :--- |
 | **generate** | **semak-feign:generate** | 提取指定模块的Facade、DTO，处理后输出到目标模块 |
 
-
-
 **`注意`**:
 
-
-- **插件执行前，整个项目需要进行一次完整的安装`mvn install`**。
-- **配置插件时，将`inherited`节点设置为`false`**。
+- 插件执行前，整个项目需要进行一次完整的安装`mvn install`。
+- 配置插件时，将`inherited`节点设置为`false`。
 
 
 
@@ -106,10 +107,7 @@
 | :--- | :--- |
 | **applicationName** | 同`spring.application.name`的值，建议由`产线名称.应用名称`构成 |
 | **modules.module.name** | 项目模块名称，即Maven Module名称 |
-| **modules.module.type** | 主要由三个类型构成：
- **FACADE**: 标识为服务接口（Facade）的来源模块 
- **DTO**: 标识为数据传输对象（DTO）的来源模块 
- **DESTINATION**: 标识为生成客户端代理接口（含自动配置）的模块 |
+| **modules.module.type** | 主要由三个类型构成：<br/>**FACADE**: 标识为服务接口（Facade）的来源模块 <br/>**DTO**: 标识为数据传输对象（DTO）的来源模块 <br/>**DESTINATION**: 标识为生成客户端代理接口（含自动配置）的模块 |
 | **modules.module.facadePackage** | 当`modules.module.type`为`FACADE`时，使用此属性。标识了模块中FACADE接口的来源包名。 |
 | **modules.module.dtoPackage** | 当`modules.module.type`为`DTO`时，使用此属性。标识了模块中DTO的来源包名。 |
 
@@ -234,6 +232,7 @@ $ mvn semak-feign:generate
 ```
 
 
+
 ### 4.2. 生成的目标模块结构
 
 
@@ -241,6 +240,7 @@ $ mvn semak-feign:generate
 
 
 ![](https://cdn.nlark.com/yuque/0/2020/jpeg/1241873/1590744470967-e64a601a-3786-44c0-9b1a-183beddd2512.jpeg#align=left&display=inline&height=340&margin=%5Bobject%20Object%5D&originHeight=340&originWidth=372&status=done&style=none&width=372)
+
 
 
 ### 4.3. 生成的Facade接口一览
@@ -344,6 +344,7 @@ public interface DemoFacade {
 我们可以看到插件对接口进行了注解渲染，以满足Feign客户端接口代理的需要。。
 
 
+
 ### 4.4. 生成的DTO接口一览
 
 
@@ -411,7 +412,14 @@ public class UserRequest extends BaseRequest {
 ```
 
 
+
 ## 5. 插件发布
 
 
 最后，我们将自动生成的Facade模块进行打包发布后，二方/三方通过Maven配置完Facade坐标后，即可以基于此Facade进行Feign的接口代理调用。
+
+
+
+## 6. 问题
+
+一般来说，Facade模块不能在项目中被其他模块引用。如果由于某种原因需要这么做（如：构建组件），那么在构建Facade模块时，请将与其相关的模块现行注释，运行插件生成完代码后，再放开注释，以避免无法生成新Facade的问题。

@@ -1,3 +1,5 @@
+# semak-resource-bundle-plugin
+
 `semak-resource-bundle-plugin`是一款提供了资源绑定功能的Maven插件，其特性主要包括：
 
 
@@ -36,8 +38,6 @@
 
 
 > 占位符根据项目模块路径进行替换
-
-
 
 ```xml
 <properties>
@@ -82,6 +82,7 @@
 注意：请设置`inherited`属性为`false`。
 
 
+
 ## 3. 插件配置描述
 
 
@@ -90,8 +91,6 @@
 | 目标名称 | 执行目标 | 描述 |
 | :--- | :--- | :--- |
 | **bundle-process** | **semak-resource-bundle:bundle-process** | 将资源文件转换为资源类 |
-
-
 
 目标**semak-resource-bundle:bundle-process**包含的参数：
 
@@ -108,13 +107,12 @@
 
 > **classpath:bundle/message.properties**
 
-
-
 ```yaml
 999999=系统处理异常！：{0}
 -999998=数据库处理异常！：{0}
 -12321=测试业务异常：{0}
 ```
+
 
 
 ## 5. 运行插件
@@ -166,6 +164,7 @@ $ mvn semak-resource-bundle:bundle-process
 ```
 
 
+
 ### 5.2. 在指定的Maven生命周期中运行
 
 
@@ -190,6 +189,7 @@ $ mvn semak-resource-bundle:bundle-process
      </execution>
  </executions>
 ```
+
 
 
 ### 5.3. 输出资源类

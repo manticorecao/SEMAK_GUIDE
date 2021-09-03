@@ -1,3 +1,5 @@
+# semak-jasypt-maven-plugin
+
 `semak-jasypt-maven-plugin`插件是一款基于jasypt的加解密Maven插件，其特性主要包括：
 
 
@@ -30,6 +32,7 @@
 ```
 
 
+
 ## 2. 插件配置
 
 
@@ -47,6 +50,7 @@
     </plugins>
 </build>
 ```
+
 
 
 ## 3. 插件配置描述
@@ -88,6 +92,7 @@ mvn semak-jasypt:encrypt -Djasypt.plain-password=psfp
 ```
 
 
+
 ### 4.2. 加密参数描述
 
 
@@ -120,6 +125,7 @@ mvn semak-jasypt:decrypt -Djasypt.enc-password=409XzuLG2vmRexN08yIvKg==
 ```
 
 
+
 ### 4.4. 解密参数描述
 
 
@@ -127,5 +133,4 @@ mvn semak-jasypt:decrypt -Djasypt.enc-password=409XzuLG2vmRexN08yIvKg==
 | :--- | :--- | :--- |
 | **jasypt.salt** | 否 | 加解密用到的盐值，默认使用组件内置提供的盐值 |
 | **jasypt.enc-password** | 是 | 密码密文 |
-
 

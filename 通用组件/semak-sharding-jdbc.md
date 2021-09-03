@@ -1286,9 +1286,7 @@ spring:
 | **datasource.names** | String | 是 | none | 使用的数据源名称，多个数据源用英文逗号分隔 |
 | **sharding.default-key-generator.type** | String | 是 | none | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE和ZK_BASED_SNOWFLAKE |
 | **sharding.default-key-generator.column** | String | 是 | none | 自增列名称 |
-| **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置 
- _ 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性 
- _ 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
+| **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
 | **sharding.binding-tables** | List | 否 | none | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
 | **sharding.tables.<logic-table-name>.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
 | **sharding.tables.<logic-table-name>.table-strategy.standard.sharding-column** | String | 否 | none | 分表标准分片策略：单分片使用的列名 |
@@ -1673,9 +1671,7 @@ spring:
 | **datasource.names** | String | 是 | none | 使用的数据源名称，多个数据源用英文逗号分隔 |
 | **sharding.default-key-generator.type** | String | 是 | none | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE和ZK_BASED_SNOWFLAKE |
 | **sharding.default-key-generator.column** | String | 是 | none | 自增列名称 |
-| **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置 
- _ 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性 
- _ 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
+| **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
 | **sharding.binding-tables** | List | 否 | none | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
 | **sharding.tables.<logic-table-name>.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
 | **sharding.tables.<logic-table-name>.database-strategy.standard.sharding-column** | String | 否 | none | 分库标准分片策略：单分片使用的列名 |
@@ -2057,9 +2053,7 @@ spring:
 | **datasource.names** | String | 是 | none | 使用的数据源名称，多个数据源用英文逗号分隔 |
 | **sharding.default-key-generator.type** | String | 是 | none | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE和ZK_BASED_SNOWFLAKE |
 | **sharding.default-key-generator.column** | String | 是 | none | 自增列名称 |
-| **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置 
- _ 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性 
- _ 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
+| **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
 | **sharding.binding-tables** | List | 否 | none | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
 | **sharding.tables.<logic-table-name>.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
 | **sharding.tables.<logic-table-name>.table-strategy.standard.sharding-column** | String | 否 | none | 分表标准分片策略：单分片使用的列名 |
@@ -2709,9 +2703,7 @@ spring:
 | **datasource.names** | String | 是 | none | 使用的数据源名称，多个数据源用英文逗号分隔 |
 | **sharding.default-key-generator.type** | String | 是 | none | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE和ZK_BASED_SNOWFLAKE |
 | **sharding.default-key-generator.column** | String | 是 | none | 自增列名称 |
-| **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置 
- _ 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性  
-  _ 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
+| **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
 | **sharding.binding-tables** | List | 否 | none | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
 | **sharding.tables.<logic-table-name>.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
 | **sharding.tables.<logic-table-name>.table-strategy.standard.sharding-column** | String | 否 | none | 分表标准分片策略：单分片使用的列名 |

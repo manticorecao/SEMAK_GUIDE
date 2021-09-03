@@ -1,3 +1,5 @@
+# semak-biz-chain
+
 `semak-biz-chain`组件是一款将责任链模式和命令模式应用与业务开发的组件，可以为业务功能的模块化、链式执行、异常处理等提供强有力的支撑。其特性主要如下：
 
 
@@ -101,26 +103,16 @@ spring:
           - com.github.semak.biz.chain.unit.BizUnit1
           - com.github.semak.biz.chain.unit.BizUnit2
           - com.github.semak.biz.chain.unit.BizUnit3
-        bizChainC3:
-          - com.github.semak.biz.chain.unit.BizUnit1
-          - com.github.semak.biz.chain.unit.BizUnit3
-          #不会被执行到
-          - com.github.semak.biz.chain.unit.BizUnit2
-        bizChainC4:
-          - com.github.semak.biz.chain.unit.BizUnit1
-          - com.github.semak.biz.chain.unit.BizUnit2
-          - com.github.semak.biz.chain.unit.BizExUnit
-          - com.github.semak.biz.chain.unit.BizUnit3
 ```
 **配置描述**
 
 | **属性** | **数据类型** | **必填** | **默认值** | **描述** |
 | --- | --- | --- | --- | --- |
 | **spring.biz.chain.enabled** | boolean | 否 | true | 启用业务链功能 |
-| **spring.biz.chain.biz-chains.<chainName>** | String | 否 |  | 业务链名称（也是BeanName） |
+| **spring.biz.chain.biz-chains.<chainName>** | String | 否 |  | 业务链名称（**也是BeanName**） |
 | **spring.biz.chain.biz-chains.<chainName>.<units>** | List<String> | 否 |  | 业务单元类的全名 |
 
-## 
+
 ## 4. 执行业务链
 在完成以上的定义和配置后，我们可以这样开始执行一条业务链。
 ```java
