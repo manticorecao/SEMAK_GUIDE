@@ -505,7 +505,7 @@ public class DefaultDemoFacade implements DemoFacade {
 `semak-rest` 组件提供了Java SPI的方式来接入自定义的业务异常类。
 
 
-> **SPI **Service Provider Interface，是一种**调用方**来制定接口，**实现方**针对接口进行不同的实现。**调用方**来选择自己需要的实现方。 和API（Application Programming Interface）不同，都是**实现方**来制定接口并完成对接口的不同实现，**调用方**仅仅依赖却无权选择不同实现。
+> **SPI** Service Provider Interface，是一种**调用方**来制定接口，**实现方**针对接口进行不同的实现。**调用方**来选择自己需要的实现方。 和API（Application Programming Interface）不同，都是**实现方**来制定接口并完成对接口的不同实现，**调用方**仅仅依赖却无权选择不同实现。
 
 具体接入流程如下：
 

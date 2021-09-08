@@ -1,11 +1,10 @@
-# semak-elastic-job(迭代中)
-
-> 已升级到3.0.0-RC1 - 当前文档不正确，需迭代
+# semak-elastic-job
 
 `semak-elastic-job`组件是一款基于当当网Elastic-Job-Lite进行定制的去中心化的分布式调度组件，其主要特性包括：
 
 
-1. 支持丰富的作业类型（SimpleJob, DataflowJob, ScriptJob）。
+1. 支持丰富的作业类型（SimpleJob, DataflowJob, ScriptJob, HttpJob）。
+1. 支持作业监听。
 1. 支持基于数据库存储的作业事件追踪。
 1. 支持分布式调度。
 1. 支持弹性扩容缩容。
@@ -13,7 +12,9 @@
 1. 支持错过执行作业重触发。
 1. 支持作业分片一致性，保证同一分片在分布式环境中仅一个执行实例。
 1. 支持基于分片的并行调度。
+1. 支持一次性调度和定时调度
 1. 更简单的JOB配置方式。
+1. 丰富的错误处理策略。
 1. 运维平台。
 
 
@@ -42,6 +43,7 @@
 ```
 
 
+
 ## 2. 核心理念
 
 
@@ -54,13 +56,14 @@
 注册中心仅用于作业注册和监控信息存储。而主作业节点仅用于处理分片和清理等功能。
 
 
-### 2.2. 作业高可用
 
+### 2.2. 作业高可用
 
 `semak-elastic-job`组件提供最安全的方式执行作业。将分片总数设置为1，并使用多于1台的服务器执行作业，作业将会以1主n从的方式执行。
 
 
 一旦执行作业的服务器崩溃，等待执行的服务器将会在下次作业启动时替补执行。开启失效转移功能效果更好，可以保证在本次作业执行时崩溃，备机立即启动替补执行。
+
 
 
 ### 2.3. 最大限度利用资源
@@ -72,16 +75,17 @@
 例如：3台服务器，分成10片，则分片项分配结果为服务器A=0,1,2;服务器B=3,4,5;服务器C=6,7,8,9。 如果服务器C崩溃，则分片项分配结果为服务器A=0,1,2,3,4;服务器B=5,6,7,8,9。在不丢失分片项的情况下，最大限度的利用现有资源提高吞吐量。
 
 
+
 ## 3. 整体架构
 
 
-![image.png](https://cdn.nlark.com/yuque/0/2020/png/1241873/1591868172196-922be386-7c90-4b86-b095-050898fc31f8.png#align=left&display=inline&height=613&margin=%5Bobject%20Object%5D&name=image.png&originHeight=613&originWidth=1037&size=200187&status=done&style=none&width=1037)
+![image.png](.assets/1591868172196-922be386-7c90-4b86-b095-050898fc31f8.png)
 
 
 ## 4. 作业定义
 
 
-当前支持3种类型的作业，下面分别进行说明。需要注意的是，下面的作业，除了ScriptJob外，定义时除了实现必要的接口之外，还需要添加`@Component`注解来声明为一个Spring的Bean。
+当前支持4种类型的作业，下面分别进行说明。需要注意的是，下面的作业，除了ScriptJob和HttpJob外，定义时不仅需要实现必要的接口，还需要添加`@Component`注解来声明为一个Spring的Bean。
 
 
 ### 4.1. Simple类型作业
@@ -111,6 +115,7 @@ public class DemoSimpleJob implements SimpleJob {
     }
 }
 ```
+
 
 
 ### 4.2. Dataflow类型作业
@@ -148,10 +153,8 @@ public class DemoDataFlowJob implements DataflowJob<Foo> {
 ```
 
 
+
 #### 4.2.1. 流式处理
-
-
-可通过设置配置项`spring.lite-job.jobs.<jobName>.streaming-process`为`true`来开启流式处理。
 
 
 流式处理数据只有**fetchData**方法的返回值为null或集合长度为空时，作业才停止抓取，否则作业将一直运行下去。
@@ -163,10 +166,11 @@ public class DemoDataFlowJob implements DataflowJob<Foo> {
 如果采用流式作业处理方式，建议**processData**处理数据后更新其状态，避免**fetchData**再次抓取到，从而使得作业永不停止。 流式数据处理参照**TbSchedule**设计，适用于不间歇的数据处理。
 
 
+
 ### 4.3. Script类型作业
 
 
-Script类型作业意为脚本类型作业，支持shell，python，perl等所有类型脚本。只需通过控制台或代码配置scriptCommandLine即可，无需编码。执行脚本路径可包含参数，参数传递完毕后，作业框架会自动追加最后一个参数为作业运行时信息。
+Script类型作业为脚本类型作业，支持shell，python，perl等所有类型脚本。只需通过控制台或代码配置scriptCommandLine即可，无需编码。执行脚本路径可包含参数，参数传递完毕后，作业框架会自动追加最后一个参数为作业运行时信息。
 
 
 ```bash
@@ -179,94 +183,164 @@ echo sharding execution context is $*
 
 
 ```
-sharding execution context is {“jobName”:“scriptElasticDemoJob”,“shardingTotalCount”:10,“jobParameter”:“”,“shardingItem”:0,“shardingParameter”:“A”}
+sharding execution context is {"jobName":"scriptElasticDemoJob","shardingTotalCount":10,"jobParameter":"","shardingItem":0,"shardingParameter":"A"}
 ```
+
+
+
+### 4.4. HTTP类型作业
+
+HTTP类型作业基于Http协议来调用服务端点，通过一系列的`http.*`属性来配置调用参数，无需编码，分片信息以**Http Header**的形式传递
+
 
 
 ## 5. 作业配置
 
 
-定义完作业类或脚本后，我们需要进行一下简单配置，以启用作业。
+定义完作业类或脚本后，我们需要进行一下简单配置，以启用作业。下面是一份jiao
 
 
 ```yaml
-spring:
-  application:
-    name: job-test
-  lite-job:
-    zk:
-      connect-string: 127.0.0.1:2181
-      namespace: lite-job-test/${spring.application.name}
-    base-job-definition:
-      disabled: false
-      # 开启事件追踪
-      enable-trace-rdb: false
-      job-type: simple
+elasticjob:
+  reg-center:
+    server-lists: ${spring.zookeeper.connect-string}
+    namespace: lite-job/${spring.application.name}
+    digest: ${spring.zookeeper.digest}
+    max-sleep-time-milliseconds: 30000
+  jobs:
+    JOB-A:
+      elasticJobClass: com.github.semak.elastic.job.test.job.DemoSimpleJob
+      overwrite: true
+      #监控作业执行时状态
+      monitorExecution: true
+      #是否开启失效转移,只有monitorExecution开启才生效
+      failover: true
+      cron: "0/10 * * * * ?"
+      sharding-total-count: 3
+      sharding-item-parameters: 0=Beijing,1=Shanghai,2=Guangzhou
+      job-parameter: "作业A-测试参数1"
+      description: "DEMO A 描述"
+      #将JobListener实现添加至resources/META-INF/services/org.apache.shardingsphere.elasticjob.infra.listener.ElasticJobListener中
+      job-listener-types:
+        - "simpleListener"
+    JOB-B:
+      elasticJobClass: com.github.semak.elastic.job.test.job.DemoDataflowJob
+      overwrite: true
+      cron: "0/15 * * * * ?"
+      sharding-total-count: 1
+      job-parameter: "作业B-测试参数1"
+      description: "DEMO B 描述"
+      job-listener-types:
+        - "onceListener"
+    JOB-C:
+      elasticJobType: SCRIPT
+      overwrite: true
+      cron: "0/5 * * * * ?"
+      sharding-total-count: 3
+      props:
+        script.command.line: "echo SCRIPT Job: "
+    JOB-D:
+      elasticJobType: HTTP
+      overwrite: true
+      cron: "0/20 * * * * ?"
+      sharding-total-count: 1
+      props:
+        http.uri: "http://localhost:8080/execute"
+        http.method: "POST"
+        http.data: "{\"source\":\"job\",\"content\":\"测试111222333\"}"
+        http.content.type: "application/json"
+    #一次性调度
+    JOB-E:
+      jobBootstrapBeanName: manualJobBean
+      elasticJobClass: com.github.semak.elastic.job.test.job.ManualSimpleJob
       overwrite: true
       sharding-total-count: 1
-      misfire: true
-      job-listener-class:
-        - com.github.semak.elastic.job.test.listener.JobListener
-    jobs:
-      job-a:
-        alias: 作业A
-        job-class: com.github.semak.elastic.job.test.job.DemoSimpleJob
-        #sharding-total-count: 3
-        #sharding-item-parameters: 0=shanghai,1=beijing,2=guangzhou
-        cron: "0/10 * * * * ?"
-        job-parameter: "作业A-测试参数1"
-        description: "DEMO A 描述"
-      job-b:
-        alias: 作业B
-        job-type: dataflow
-        job-class: com.github.semak.elastic.job.test.job.DemoDataflowJob
-        cron: "0/20 * * * * ?"
-        job-parameter: "作业B-测试参数1"
-        description: "DEMO B 描述"
-        streaming-process: true
-      job-c:
-        alias: 作业C
-        job-type: script
-        cron: "0/30 * * * * ?"
-        description: "DEMO C 描述"
-        script-command-line: "/Users/brevy/Project/Github/semak/semak-elastic-job/semak-elastic-job-test/src/main/resources/demo.sh"
+      job-parameter: "作业E-测试参数1"    
 ```
 
 
+
 ### 5.1. 配置描述
-| **属性** | **必填** | **默认值** | **描述** |
-| :--- | :--- | :--- | :--- |
-| **spring.lite-job.enabled** | 否 | true | 开启分布式任务调度功能 |
-| **spring.lite-job.zk.connect-string** | 是 |   | zookeeper地址连接串 |
-| **spring.lite-job.zk.namespace** | 是 |   | zookeeper命名空间 |
-| **spring.lite-job.base-job-definition.*** | 否 |   | 作业通用配置，可被具体作业所继承并覆盖，包含属性同具体作业一致 |
-| **spring.lite-job.jobs.<jobName>.disabled** | 否 | false | 作业是否启动时禁止 |
-| **spring.lite-job.jobs.<jobName>.alias** | 否 |   | Job别名 |
-| **spring.lite-job.jobs.<jobName>.job-class** | 是 |   | 作业实现类，需实现 `com.dangdang.ddframe.job.api.ElasticJob`接口，**script类型的作业不需要填写此属性** |
-| **spring.lite-job.jobs.<jobName>.cron** | 是 |   | CRON表达式，定义作业执行时间 |
-| **spring.lite-job.jobs.<jobName>.enable-trace-rdb** | 否 | false | 启用作业事件追踪 |
-| **spring.lite-job.jobs.<jobName>.job-parameter** | 否 |   | 作业自定义参数 |
-| **spring.lite-job.jobs.<jobName>.description** | 否 |   | 作业描述 |
-| **spring.lite-job.jobs.<jobName>.streaming-process** | 否 | false | **dataflow类型的作业专用**，开启流式处理 |
-| **spring.lite-job.jobs.<jobName>.script-command-line** | 是 |   | **script类型的作业专用**， 执行脚本的绝对路径 |
-| **spring.lite-job.jobs.<jobName>.job-type** | 是 |   | Job类型分为：**SIMPLE**, **DATAFLOW**, **SCRIPT** |
-| **spring.lite-job.jobs.<jobName>.overwrite** | 否 | true | 本地配置是否可覆盖注册中心配置 |
-| **spring.lite-job.jobs.<jobName>.misfire** | 否 | true | 是否开启错过任务重新执行 |
-| **spring.lite-job.jobs.<jobName>.job-listener-class** | 否 |   | 作业监听器实现类（可以列表的形式配置多个） |
-| **spring.lite-job.jobs.<jobName>.job-sharding-strategy-class** | 否 | com.dangdang.ddframe.job.lite.api.strategy.impl.AverageAllocationJobShardingStrategy | 设置作业分片策略实现类全路径 |
-| **spring.lite-job.jobs.<jobName>.sharding-total-count** | 否 | 1 | 作业分片总数 |
-| **spring.lite-job.jobs.<jobName>.sharding-item-parameters** | 否 |   | 设置分片序列号和个性化参数对照表 |
-| **spring.lite-job.jobs.<jobName>.max-time-diff-seconds** | 否 | -1 | 最大允许的本机与注册中心的时间误差秒数。如果时间误差超过配置秒数则作业启动时将抛异常，配置为-1表示不校验时间误差修复作业服务器不一致状态服务调度间隔时间，配置为小于1的任意值表示不执行修复(默认：10) |
-| **spring.lite-job.jobs.<jobName>.reconcile-interval-minutes** | 否 | 10 | 修复作业服务器不一致状态服务调度间隔时间，配置为小于1的任意值表示不执行修复，单位：分钟 |
 
-### 
-### 5.2. 自诊断修复
+#### 5.1.1. 注册中心配置
+
+> 当前仅支持zookeeper作为其注册中心
+
+| **属性** | 类型 | **必填** | **默认值** | **描述** |
+| :--- | :--- | :--- | :--- | :--- |
+| **elasticjob.reg-center.server-lists** | String | 是 |  | 连接 ZooKeeper 服务器的列表。由IP地址和端口组成，多个IP地址使用英文逗号分隔 。<br/>例子：`host1:2181,host2:2181` |
+| **elasticjob.reg-center.namespace** | String | 是 |   | zookeeper的命名空间 |
+| **elasticjob.reg-center.base-sleep-time-milliseconds** | int | 否 | 1000 | 等待重试的间隔时间的初始毫秒数 |
+| **elasticjob.reg-center.max-sleep-time-milliseconds** | int | 否 | 3000 | 等待重试的间隔时间的最大毫秒数 |
+| **elasticjob.reg-center.max-retries** | int | 否 | 3 | 最大重试次数 |
+| **elasticjob.reg-center.session-timeout-milliseconds** | int | 否 | 60000 | 会话超时毫秒数 |
+| **elasticjob.reg-center.connection-timeout-milliseconds** | int | 否 | 15000 | 连接超时毫秒数 |
+| **elasticjob.reg-center.digest** | String | 否 | | 连接 ZooKeeper 的权限令牌（digest为ACL Schema中的一种） |
 
 
-在分布式的场景下由于网络、时钟等原因，可能导致Zookeeper的数据与真实运行的作业产生不一致，这种不一致通过正向的校验无法完全避免。需要另外启动一个线程定时校验注册中心数据与真实作业状态的一致性，即维持Job的最终一致性。
+
+#### 5.1.2. 作业配置
+
+| **属性**                                                     | 类型       | **必填**                                                     | **默认值**     | **描述**                                                     |
+| ------------------------------------------------------------ | ---------- | ------------------------------------------------------------ | -------------- | ------------------------------------------------------------ |
+| **elasticjob.jobs.&lt;jobName&gt;.elasticJobClass**                | String     | 是（与`elasticJobType`属性互斥）                             |                | 作业的Java全类名                                             |
+| **elasticjob.jobs.&lt;jobName&gt;. elasticJobType**                | String     | 是（与`elasticJobClass`属性互斥）                            |                | 作业的类型，目前支持项为：**SCRIPT**和**HTTP**               |
+| **elasticjob.jobs.&lt;jobName&gt;.cron**                           | String     | 否（配置此属性为**定时调度**作业，不配置为**一次性调度**作业） |                | CRON 表达式，用于控制作业触发时间                            |
+| **elasticjob.jobs.&lt;jobName&gt;.timeZone**                       | String     | 否                                                           |                | CRON 的时区设置。<br/>例子：`GMT+08:00`                      |
+| **elasticjob.jobs.&lt;jobName&gt;.jobBootstrapBeanName**           | String     | 否                                                           |                | 一次性调度作业时配置，指定`OneOffJobBootstrap Bean`的名称    |
+| **elasticjob.jobs.&lt;jobName&gt;.sharding-total-count**          | int        | 是                                                           |                | 作业分片总数（如无需分多片执行作业，将值设置为`1`即可）      |
+| **elasticjob.jobs.&lt;jobName&gt;. sharding-item-parameters**      | String     | 否                                                           |                | 设置分片序列号和个性化参数对照表。<br/>例子：`0=Beijing,1=Shanghai,2=Guangzhou` |
+| **elasticjob.jobs.&lt;jobName&gt;. job-parameter**                 | String     | 否                                                           |                | 作业自定义参数                                               |
+| **elasticjob.jobs.&lt;jobName&gt;. monitor-execution**             | boolean    | 否                                                           | true           | 监控作业运行时状态                                           |
+| **elasticjob.jobs.&lt;jobName&gt;.failover**                       | boolean    | 否                                                           | false          | 是否开启任务执行失效转移，只有`monitorExecution`开启才生效   |
+| **elasticjob.jobs.&lt;jobName&gt;.misfire **                       | boolean    | 否                                                           | true           | 是否开启错过任务重新执行                                     |
+| **elasticjob.jobs.&lt;jobName&gt;. max-time-diff-seconds**         | int        | 否                                                           | -1（不检查）   | 最大允许的本机与注册中心的时间误差秒数                       |
+| **elasticjob.jobs.&lt;jobName&gt;. reconcile-interval-minutes**    | int        | 否                                                           | 10             | 修复作业服务器不一致状态服务调度间隔分钟                     |
+| **elasticjob.jobs.&lt;jobName&gt;. job-sharding-strategy-type**    | String     | 否                                                           | AVG_ALLOCATION | 作业分片策略类型                                             |
+| **elasticjob.jobs.&lt;jobName&gt;. job-executor-service-handler-type** | String     | 否                                                           | CPU            | 作业线程池处理策略                                           |
+| **elasticjob.jobs.&lt;jobName&gt;. job-error-handler-type**        | String     | 否                                                           |                | 作业错误处理策略                                             |
+| **elasticjob.jobs.&lt;jobName&gt;. job-listener-types**            | String     | 否                                                           |                | 作业监听器类型                                               |
+| **elasticjob.jobs.&lt;jobName&gt;.description**                   | String     | 否                                                           |                | 作业描述信息                                                 |
+| **elasticjob.jobs.&lt;jobName&gt;. props**                         | Properties | 否                                                           |                | 作业属性配置信息                                             |
+| **elasticjob.jobs.&lt;jobName&gt;. disabled**                      | boolean    | 否                                                           | false          | 作业是否禁止启动                                             |
+| **elasticjob.jobs.&lt;jobName&gt;.overwrite**                     | boolean    | 否                                                           | false          | 本地配置是否可覆盖注册中心配置                               |
+
+**核心配置项说明：**
+
+* **sharding-item-parameters**： 分片序列号和参数用等号分隔，多个键值对用逗号分隔。 分片序列号从0开始，不可大于或等于作业分片总数。 如：`0=a,1=b,2=c`。
+* **job-parameter**: 可通过传递该参数为作业调度的业务方法传参，用于实现带参数的作业 例：每次获取的数据量、作业实例从数据库读取的主键等。
+
+* **monitor-execution**: 每次作业执行时间和间隔时间均非常短的情况，建议不监控作业运行时状态以提升效率。 因为是瞬时状态，所以无必要监控。请用户自行增加数据堆积监控。并且不能保证数据重复选取，应在作业中实现幂等性。 每次作业执行时间和间隔时间均较长的情况，建议监控作业运行时状态，可保证数据不会重复选取。
+*  **max-time-diff-seconds**: 如果时间误差超过配置秒数则作业启动时将抛异常。
+* **reconcile-interval-minutes**: 在分布式的场景下由于网络、时钟等原因，可能导致 ZooKeeper 的数据与真实运行的作业产生不一致，这种不一致通过正向的校验无法完全避免。 需要另外启动一个线程定时校验注册中心数据与真实作业状态的一致性，即维持 ElasticJob 的最终一致性。配置为小于 1 的任意值表示不执行修复。
+*  **job-sharding-strategy-type**: 详情请参见 [作业分片策略](#_61-作业分片策略)。
+* **job-executor-service-handler-type**: 详情请参见 [线程池策略](#_62-线程池策略)。
+
+* **job-error-handler-type**: 详情请参见 [错误处理策略](#_63-错误处理策略)。 
 
 
-在网络不稳定的环境下可能有的作业分片并未执行，可以重启修复。但在提供了`reconcile-interval-minutes`属性配置后，可以设置修复状态服务执行间隔分钟数，修复作业服务器不一致状态，默认每10分钟检测并修复一次。
+
+## 6. 内置策略
+
+### 6.1. 作业分片策略
+
+
+
+### 6.2. 线程池策略
+
+
+
+
+
+### 6.3. 错误处理策略
+
+
+
+
+
+---- 以下内容仍在迭代中 -----
+
+
 
 
 ## 6. 分片策略
