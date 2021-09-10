@@ -25,6 +25,13 @@
       //subMaxLevel: 5,
       //set sidebar display level
       sidebarDisplayLevel: 1,
+      scrollToTop: {
+        auto: true,
+        text: 'Top',
+        right: 15,
+        bottom: 15,
+        offset: 500
+      },
       toc: {
     	tocMaxLevel: 6,
     	target: 'h1, h2, h3, h4, h5, h6'
@@ -70,6 +77,7 @@
   <script src="docsify@4.js"></script>
   <!-- plugins -->
   <script src=".plugin/emoji.min.js"></script>
+  <script src=".plugin/docsify-scroll-to-top.min.js"></script>
   <script src=".plugin/docsify-sidebar-collapse.min.js"></script>
   <script src=".plugin/docsify-plugin-toc.min.js"></script>
   <script src=".plugin/countable.min.js"></script>
