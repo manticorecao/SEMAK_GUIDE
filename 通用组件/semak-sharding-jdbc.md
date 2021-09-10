@@ -1745,8 +1745,6 @@ public void insertWithShardingDatabase() {
 
 
 > `ts_order`通过`user_id`进行分片，这里仅做部分数据展示。
->
-> 2019-07-05 05:00:23:22:11
 
 **db0.ts_order_0**
 
