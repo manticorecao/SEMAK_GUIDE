@@ -3136,7 +3136,7 @@ spring:
 
   对应`ComplexKeysShardingAlgorithm`，用于处理使用多键作为分片键进行分片的场景，包含多个分片键的逻辑较复杂，需要应用开发者自行处理其中的复杂度。
 
-组件内置扩展了几种较为通用的分片算法：
+组件内置扩展了几种较为通用的分片算法的实现：
 
 * 单键取模分片算法：分片算法可以参考包`com.github.semak.shardingjdbc.sharding.algorithm.modulo`
 * 时间范围分片算法：分片算法可以参考包`com.github.semak.shardingjdbc.sharding.algorithm.time`
