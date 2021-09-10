@@ -3121,7 +3121,7 @@ spring:
 
 > 组件默认提供的分片算法可以参考包`com.github.semak.shardingjdbc.sharding.algorithm`下的类。
 
-目前提供3种分片算法。由于分片算法和业务实现紧密相关，组件仅提供了较为简单的单键取模分片算法，并未提供其他内置分片算法。但组件还是通过分片策略将各种场景提炼出来，提供更高层级的抽象，并提供接口让应用开发者自行实现分片算法。
+目前组件提供的3种分片算法接口如下：
 
 
 - 精确分片算法
@@ -3135,6 +3135,15 @@ spring:
 - 复合分片算法
 
   对应`ComplexKeysShardingAlgorithm`，用于处理使用多键作为分片键进行分片的场景，包含多个分片键的逻辑较复杂，需要应用开发者自行处理其中的复杂度。
+
+组件内置扩展了几种较为通用的分片算法：
+
+* 单键取模分片算法：分片算法可以参考包`com.github.semak.shardingjdbc.sharding.algorithm.modulo`
+* 时间范围分片算法：分片算法可以参考包`com.github.semak.shardingjdbc.sharding.algorithm.time`
+  * 按月分片算法
+  * 按年分片算法
+
+由于分片算法和业务实现紧密相关，更复杂的业务场景需要开发人员自行扩展。
 
 
 
