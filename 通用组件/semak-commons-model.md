@@ -115,7 +115,7 @@ VO类默认继承`com.github.semak.commons.model.vo.BaseVo`。
 #### 2.5.1. 基于Lombok注解的Builder
 
 
-这是一种比较简单的方式，在你的项目支出Lombok注解的情况下，需要添加几个类注解即可，它们分别是：
+这是一种比较简单的方式，在你的项目支持Lombok注解的情况下，需要添加几个类注解即可，它们分别是：
 
 
 ```java

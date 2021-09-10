@@ -204,7 +204,7 @@ HTTP类型作业基于Http协议来调用服务端点，通过一系列的`http.
 elasticjob:
   reg-center:
     server-lists: ${spring.zookeeper.connect-string}
-    namespace: lite-job-${spring.profiles}/${spring.application.name}
+    namespace: lite-job-${spring.profiles.active}/${spring.application.name}
     digest: ${spring.zookeeper.digest}
     max-sleep-time-milliseconds: 30000
   jobs:

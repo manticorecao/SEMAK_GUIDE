@@ -113,7 +113,7 @@ semak-guardian:
 #### 3.1.1. 属性描述
 
 | **属性** | **数据类型** | **必填** | **默认值** | **描述** |
-| :---: | :---: | :---: | :---: | :---: |
+| :---- | :---- | :---- | :---- | :---- |
 | **spring.guardian.client.anon-uris** | List | 否 | N/A | 无需守护者客户端进行认证的URI |
 | **ribbon.eager-load.enabled** | boolean | 否 | fasle | 启用Ribbon客户端负载均衡的饥饿加载模式 |
 | **ribbon.eager-load.clients** | String | 否 | N/A | 饥饿加载模式应用到的客户端名称，以英文逗号分隔 |
