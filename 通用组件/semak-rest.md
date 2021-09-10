@@ -1486,7 +1486,7 @@ feign:
 | **feign.client.config.<feignName>.readTimeout** | int | 否 | 60000 | 读取超时，单位：毫秒 |
 | **feign.default-reader-plugin** | String | 否 | com.github.semak.rest.core.plugin.client.impl.DefaultReaderPlugin | 客户端读取响应报文的适配插件的全类名 |
 
-- **<feignName>属性**指的是**@FeignClient**注解中的**name**属性。 如果此项值为**default**，则默认为全局的OpenFeign客户端设置属性。
+- **&lt;feignName&gt;属性** 指的是 **@FeignClient** 注解中的**name**属性。 如果此项值为**default**，则默认为全局的OpenFeign客户端设置属性。
 - **这里需要注意的是**，`feign.client.config.<feignName>.*`属性的生效条件为：使用`@FeignClient注解的url属性`这里，我们简单阐述一下这个配置的失效原因。由于启用服务发现功能时，客户端负载均衡组件`Ribbon`的配置优先，会覆盖掉`Feign`的冲突配置。覆盖的配置我们可以到`Ribbon`中进行配置。
 
 
@@ -1773,7 +1773,8 @@ Sentinel 并发控制不负责创建和管理线程池，而是**简单统计当
 
 3. 基于上面应用配置的样例，我们执行一次 `curl -X GET "http://localhost:8080/demo/appHello/sleep" -H "accept: application/json"` ，返回结果如下：
 
-   <img src="https://cdn.nlark.com/yuque/0/2020/png/1241873/1593585166020-7bc19cb2-6618-45b8-85ff-a12b4ab2e7d8.png" alt="image.png" style="zoom:70%;" />
+   ![image](.assets/1593585166020-7bc19cb2-6618-45b8-85ff-a12b4ab2e7d8-1258869.png)
+   
    然后，我们分出6个会话窗口同时执行，让 `demoFacade.appHello` 占满5个以上线程，就会发现，其中一个会话窗口的返回的报文内容为降级后的输出，故其请求的流量被拒绝了。
    ![image.png](.assets/1593585643907-69126423-85fd-4d1f-90b0-fa5e11b95bee.png)
    查看 `Sentinel` 控制台的实时监控，的确也是如此。通过5个QPS，拒绝了1个QPS。
@@ -1792,7 +1793,8 @@ Sentinel 并发控制不负责创建和管理线程池，而是**简单统计当
 
 2. **Warm Up**方式，即预热/冷启动方式。当系统长期处于低水位的情况下，当流量突然增加时，直接把系统拉升到高水位可能瞬间把系统压垮。通过"冷启动"，让通过的流量缓慢增加，在一定时间内逐渐增加到阈值上限，给冷系统一个预热的时间，避免冷系统被压垮。通常冷启动的过程系统允许通过的 QPS 曲线如下图所示：
 
-        ![](.assets/1593586024497-645fa6a6-5bcd-4f01-ad3f-73dbba5af974.png)
+       ![](.assets/1593586024497-645fa6a6-5bcd-4f01-ad3f-73dbba5af974.png)
+
    简单来说，默认 `coldFactor` 为 3，即请求 QPS 从 `threshold / 3` 开始，经预热时长逐渐升至设定的 QPS 阈值。更详细的文档可以参考 [流量控制 - Warm Up](https://github.com/alibaba/Sentinel/wiki/%E9%99%90%E6%B5%81---%E5%86%B7%E5%90%AF%E5%8A%A8)。
 
 3. **匀速排队**方式，会严格控制请求通过的间隔时间，也即是让请求以均匀的速度通过，对应的是漏桶算法。详细文档可以参考 [流量控制 - 匀速器模式](https://github.com/alibaba/Sentinel/wiki/%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6-%E5%8C%80%E9%80%9F%E6%8E%92%E9%98%9F%E6%A8%A1%E5%BC%8F)。该方式的作用如下图所示：
