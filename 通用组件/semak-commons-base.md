@@ -324,3 +324,165 @@ File: [warn.png], MimeType: [image/png].
 File: [bankofshanghai.rar], MimeType: [application/x-rar-compressed].
 ```
 也可以通过工具中的 `valicateFileType` 的方法指定MimeType（枚举类）来对比文件。
+
+
+
+### 2.8. Bean拷贝工具
+
+基于**Cglib类库**扩展的Bean拷贝工具，提供了**全量**与**增量**Bean拷贝，并支持**浅拷贝**和**深拷贝**功能。
+
+定义来源和目标Bean
+
+```java
+@Data
+public static class So {
+
+    private String id;
+
+    private String countrycode;
+
+    private String countryname;
+
+    private List<InnerObj> innerObjList;
+}
+
+@Data
+public static class To {
+
+    private String id;
+
+    private String countrycode;
+
+    private String countryname;
+
+    private List<InnerObj> innerObjList;
+}
+
+@Data
+public static class InnerObj {
+
+    private String name;
+
+    private String code;
+}
+```
+
+
+
+#### 2.8.1. 全量拷贝
+
+将源对象所有字段值拷贝到目标对应字段，包括**源对象的Null值**。
+
+```java
+@Test
+public void fullCopy(){
+     So so = new So();
+     so.setCountrycode("CN");
+     so.setCountryname("China");
+     so.setId("1");
+
+     To to = new To();
+     BeanCopyUtil.copyProperties(so, to, BeanCopyUtil.OverridePolicy.FULL);
+     log.info(">>> To: {}", to);
+}
+```
+
+输出结果：
+
+```
+>>> To: BeanCopyUtilTestCase.To(id=1, countrycode=CN, countryname=China, innerObjList=null)
+```
+
+
+
+#### 2.8.2. 增量拷贝
+
+将源对象所有字段值拷贝到目标对应字段。如果**源对象的字段值为Null**，而**目标对象的对应字段值不为Null**，则源对象字段的Null值**不会拷贝**到目标对应的字段。
+
+```java
+@Test
+public void incrCopy(){
+    So so = new So();
+    so.setId("1");
+
+    To to = new To();
+    to.setCountrycode("AU");
+    to.setCountryname("Australia");
+    to.setId("2");
+
+    BeanCopyUtil.copyProperties(so, to, BeanCopyUtil.OverridePolicy.FULL);
+    log.info(">>> To: {}", to);
+
+    to = new To();
+    to.setCountrycode("AU");
+    to.setCountryname("Australia");
+    to.setId("2");
+
+    BeanCopyUtil.copyProperties(so, to, BeanCopyUtil.OverridePolicy.INCREMENTAL);
+    log.info(">>> To: {}", to);
+}
+```
+
+输出结果：
+
+```
+>>> To: BeanCopyUtilTestCase.To(id=1, countrycode=null, countryname=null, innerObjList=null)
+>>> To: BeanCopyUtilTestCase.To(id=1, countrycode=AU, countryname=Australia, innerObjList=null)
+```
+
+
+
+#### 2.8.3. 深拷贝
+
+>  在不显式调用深拷贝方法时，即视为浅拷贝。在调用深度拷贝时，请注意评估被克隆对象的大小，大量的对象深拷贝，可能会导致JVM Crash。
+
+```java
+@Test
+public void deepCopy(){
+    InnerObj innerObj1 = new InnerObj();
+    innerObj1.setCode("1");
+    innerObj1.setName("Geo");
+    InnerObj innerObj2 = new InnerObj();
+    innerObj2.setCode("2");
+    innerObj2.setName("Alice");
+    InnerObj innerObj3 = new InnerObj();
+    innerObj3.setCode("3");
+    innerObj3.setName("Karl");
+    List<InnerObj> innerObjs = new ArrayList(3){{
+        add(innerObj1);
+        add(innerObj2);
+        add(innerObj3);
+    }};
+
+    So so = new So();
+    so.setInnerObjList(innerObjs);
+    To to = new To();
+
+    //引用
+    BeanCopyUtil.copyProperties(so, to, BeanCopyUtil.OverridePolicy.FULL);
+    to.getInnerObjList().get(0).setName("NA");
+    log.info(">>> to: {}", to);
+    log.info(">>> so: {}", so);
+
+
+    //值
+    BeanCopyUtil.deepCopyProperties(so, to , BeanCopyUtil.OverridePolicy.FULL);
+    to.getInnerObjList().get(0).setName("NA");
+    log.info(">>> to: {}", to);
+    log.info(">>> so: {}", so);
+
+}
+```
+
+输出结果：
+
+```
+>>> to: BeanCopyUtilTestCase.To(id=null, countrycode=null, countryname=null, innerObjList=[BeanCopyUtilTestCase.InnerObj(name=NA, code=1), BeanCopyUtilTestCase.InnerObj(name=Alice, code=2), BeanCopyUtilTestCase.InnerObj(name=Karl, code=3)])
+>>> so: BeanCopyUtilTestCase.So(id=null, countrycode=null, countryname=null, innerObjList=[BeanCopyUtilTestCase.InnerObj(name=NA, code=1), BeanCopyUtilTestCase.InnerObj(name=Alice, code=2), BeanCopyUtilTestCase.InnerObj(name=Karl, code=3)])
+
+
+>>> to: BeanCopyUtilTestCase.To(id=null, countrycode=null, countryname=null, innerObjList=[BeanCopyUtilTestCase.InnerObj(name=NA, code=1), BeanCopyUtilTestCase.InnerObj(name=Alice, code=2), BeanCopyUtilTestCase.InnerObj(name=Karl, code=3)])
+>>> so: BeanCopyUtilTestCase.So(id=null, countrycode=null, countryname=null, innerObjList=[BeanCopyUtilTestCase.InnerObj(name=Geo, code=1), BeanCopyUtilTestCase.InnerObj(name=Alice, code=2), BeanCopyUtilTestCase.InnerObj(name=Karl, code=3)])
+
+```
+

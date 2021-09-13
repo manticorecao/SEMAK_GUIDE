@@ -239,7 +239,7 @@ $ mvn semak-feign:generate
 自动生成后的**Facade**模块结构如下：
 
 
-![](https://cdn.nlark.com/yuque/0/2020/jpeg/1241873/1590744470967-e64a601a-3786-44c0-9b1a-183beddd2512.jpeg#align=left&display=inline&height=340&margin=%5Bobject%20Object%5D&originHeight=340&originWidth=372&status=done&style=none&width=372)
+![](.assets/1590744470967-e64a601a-3786-44c0-9b1a-183beddd2512.jpeg)
 
 
 
