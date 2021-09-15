@@ -46,6 +46,8 @@
 
 1. Open JDK 1.8+，并已配置有效的环境变量。
 1. Maven 3.3.x+，并已配置有效的环境变量。
+1. Alibaba Nacos-Server 1.3.0+，并以集群方式提供高可用的服务（服务治理时必选）。
+1. Alibaba Sentinel Dashboard 1.7.2+（服务治理时建议必选）。
 
 
 
@@ -60,7 +62,10 @@
     <version>最新RELEASE版本</version>
 </dependency>
 ```
+
+
 #### 1.2.2. 扩展依赖（服务端+客户端+服务治理完整功能）
+
 ```xml
 <dependency>
    <groupId>com.github.semak.rest</groupId>

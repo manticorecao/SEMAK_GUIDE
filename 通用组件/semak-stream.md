@@ -83,6 +83,9 @@
 
 1. Open JDK 1.8+，并已配置有效的环境变量。
 1. Maven 3.3.x+，并已配置有效的环境变量。
+1. RabbitMQ 3.7+ （使用RabbitMQ适配时必选）
+1. RocketMQ 4.7+（使用RocketMQ适配时必选）
+1. Kafka 2.13-2.6.0（使用Kafka适配时必选）
 
 
 
@@ -162,7 +165,10 @@ spring:
           group: biz.q
 ```
 
+
+
 ### 4.2. 属性描述
+
 | **属性** | **是否必填** | **默认值** | **描述** |
 | :--- | :--- | :--- | :--- |
 | **spring.cloud.stream.binders.<binderName>.type** | 是 |   | 绑定器类型支持：`rabbit`, `kafka` |
@@ -239,7 +245,10 @@ public interface DemoSource {
 }
 ```
 
+
+
 #### 5.1.2. 配置通道绑定
+
 ```yaml
 spring:
   cloud:
@@ -293,7 +302,10 @@ demoSourceSender.send(userRequest);
 ```
 这样，一条消息就被发送到队列中了。
 
+
+
 ### 5.2. 消费者定义
+
 #### 5.2.1. 定义输入通道
 ```java
 public interface DemoSink {
@@ -305,7 +317,10 @@ public interface DemoSink {
 }
 ```
 
+
+
 #### 5.2.2. 配置通道绑定
+
 ```yaml
 spring:
   cloud:

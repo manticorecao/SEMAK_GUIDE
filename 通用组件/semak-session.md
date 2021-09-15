@@ -3,7 +3,7 @@
 `semak-session` 提供了会话（session）中心化的功能，基于 `spring-session` 项目进行了扩展。其主要特性包括：
 
 
-1. 支持基于 `semak-redis` 组件的分布式会话功能（建议配合`semak-redis`组件使用）。
+1. 支持基于 `semak-redis` 组件的分布式会话功能。
 1. 支持Redis Key的命名空间（前缀）设置。
 1. 支持会话的超时设置。
 1. 支持基于其他存储的分布式会话功能，包括MongoDB、JDBC、HAZELCAST等。
@@ -18,7 +18,7 @@
 
 1. Open JDK 1.8+，并已配置有效的环境变量。
 1. Maven 3.3.x+，并已配置有效的环境变量。
-1. 配合 `semak-session` 组件的有效的中心化存储服务，如：Redis，并预先在配置文件中设置好配置内容。
+1. Redis 6.0.8+。
 
 
 
@@ -46,7 +46,10 @@ spring:
     timeout: "PT120M"
 ```
 
+
+
 ### 2.2. 基于Redis的属性描述
+
 以下属性为 `spring.session` 的子节点属性。
 
 | **属性** | **是否必填** | **默认值** | **描述** |
