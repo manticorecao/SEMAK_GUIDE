@@ -1273,6 +1273,7 @@ spring:
 ```
 
 
+
 ### 5.3. 分表属性描述
 
 
@@ -1672,13 +1673,13 @@ spring:
 | **sharding.default-key-generator.column** | String | 是 | none | 自增列名称 |
 | **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
 | **sharding.binding-tables** | List | 否 | none | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
-| **sharding.tables.<logic-table-name>.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
-| **sharding.tables.<logic-table-name>.database-strategy.standard.sharding-column** | String | 否 | none | 分库标准分片策略：单分片使用的列名 |
-| **sharding.tables.<logic-table-name>.database-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分库标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.database-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分库标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.database-strategy.complex.sharding-columns** | String | 否 | none | 分库复合分片策略：多分片使用的列名，以逗号分隔 |
-| **sharding.tables.<logic-table-name>.database-strategy.complex.algorithm-class-name** | String | 否 | none | 分库复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.database-strategy.inline.algorithm-expression** | String | 否 | none | 分库行表达式分片策略：需符合Groovy语法 |
+| **sharding.tables.&lt;logic-table-name&gt;.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.sharding-column** | String | 否 | none | 分库标准分片策略：单分片使用的列名 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分库标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分库标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.sharding-columns** | String | 否 | none | 分库复合分片策略：多分片使用的列名，以逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.algorithm-class-name** | String | 否 | none | 分库复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.inline.algorithm-expression** | String | 否 | none | 分库行表达式分片策略：需符合Groovy语法 |
 
 
 
@@ -2054,19 +2055,19 @@ spring:
 | **sharding.default-key-generator.column** | String | 是 | none | 自增列名称 |
 | **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
 | **sharding.binding-tables** | List | 否 | none | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
-| **sharding.tables.<logic-table-name>.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
-| **sharding.tables.<logic-table-name>.table-strategy.standard.sharding-column** | String | 否 | none | 分表标准分片策略：单分片使用的列名 |
-| **sharding.tables.<logic-table-name>.table-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分表标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.table-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分表标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.table-strategy.complex.sharding-columns** | String | 否 | none | 分表复合分片策略：多分片使用的列名，以逗号分隔 |
-| **sharding.tables.<logic-table-name>.table-strategy.complex.algorithm-class-name** | String | 否 | none | 分表复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.table-strategy.inline.algorithm-expression** | String | 否 | none | 分表行表达式分片策略：需符合Groovy语法 |
-| **sharding.tables.<logic-table-name>.database-strategy.standard.sharding-column** | String | 否 | none | 分库标准分片策略：单分片使用的列名 |
-| **sharding.tables.<logic-table-name>.database-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分库标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.database-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分库标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.database-strategy.complex.sharding-columns** | String | 否 | none | 分库复合分片策略：多分片使用的列名，以逗号分隔 |
-| **sharding.tables.<logic-table-name>.database-strategy.complex.algorithm-class-name** | String | 否 | none | 分库复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.database-strategy.inline.algorithm-expression** | String | 否 | none | 分库行表达式分片策略：需符合Groovy语法 |
+| **sharding.tables.&lt;logic-table-name&gt;.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.sharding-column** | String | 否 | none | 分表标准分片策略：单分片使用的列名 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分表标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分表标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.sharding-columns** | String | 否 | none | 分表复合分片策略：多分片使用的列名，以逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.algorithm-class-name** | String | 否 | none | 分表复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.inline.algorithm-expression** | String | 否 | none | 分表行表达式分片策略：需符合Groovy语法 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.sharding-column** | String | 否 | none | 分库标准分片策略：单分片使用的列名 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分库标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分库标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.sharding-columns** | String | 否 | none | 分库复合分片策略：多分片使用的列名，以逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.algorithm-class-name** | String | 否 | none | 分库复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.inline.algorithm-expression** | String | 否 | none | 分库行表达式分片策略：需符合Groovy语法 |
 
 
 
@@ -2695,28 +2696,28 @@ spring:
 | 属性 | 数据类型 | 是否必填 | 默认值 | 描述 |
 | :--- | :--- | :--- | :--- | :--- |
 | **enabled** | Boolean | 否 | true | 是否启用组件 |
-| **master-slave-rules.<db-name>.master-data-source-name** | String | 是 | none | 读写分离规则配置，分库名为`db-name`的主库数据源名称 |
-| **master-slave-rules.<db-name>.slave-data-source-names** | String | 是 | none | 读写分离规则配置，分库名为`db-name`的从库数据源名称列表，多个数据源用英文逗号分隔 |
-| **master-slave-rules.<db-name>.load-balance-algorithm-type** | String | 否 | ROUND_ROBIN | 从库负载均衡算法(需实现MasterSlaveLoadBalanceAlgorithm接口) |
+| **master-slave-rules.&lt;db-name&gt;.master-data-source-name** | String | 是 | none | 读写分离规则配置，分库名为`db-name`的主库数据源名称 |
+| **master-slave-rules.&lt;db-name&gt;.slave-data-source-names** | String | 是 | none | 读写分离规则配置，分库名为`db-name`的从库数据源名称列表，多个数据源用英文逗号分隔 |
+| **master-slave-rules.&lt;db-name&gt;.load-balance-algorithm-type** | String | 否 | ROUND_ROBIN | 从库负载均衡算法(需实现MasterSlaveLoadBalanceAlgorithm接口) |
 | **default-data-source-name** | String | 是 | none | 默认数据源，未配置分片规则的表将通过默认数据源定位 |
 | **datasource.names** | String | 是 | none | 使用的数据源名称，多个数据源用英文逗号分隔 |
 | **sharding.default-key-generator.type** | String | 是 | none | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE和ZK_BASED_SNOWFLAKE |
 | **sharding.default-key-generator.column** | String | 是 | none | 自增列名称 |
 | **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
 | **sharding.binding-tables** | List | 否 | none | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
-| **sharding.tables.<logic-table-name>.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
-| **sharding.tables.<logic-table-name>.table-strategy.standard.sharding-column** | String | 否 | none | 分表标准分片策略：单分片使用的列名 |
-| **sharding.tables.<logic-table-name>.table-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分表标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.table-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分表标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.table-strategy.complex.sharding-columns** | String | 否 | none | 分表复合分片策略：多分片使用的列名，以逗号分隔 |
-| **sharding.tables.<logic-table-name>.table-strategy.complex.algorithm-class-name** | String | 否 | none | 分表复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.table-strategy.inline.algorithm-expression** | String | 否 | none | 分表行表达式分片策略：需符合Groovy语法 |
-| **sharding.tables.<logic-table-name>.database-strategy.standard.sharding-column** | String | 否 | none | 分库标准分片策略：单分片使用的列名 |
-| **sharding.tables.<logic-table-name>.database-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分库标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.database-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分库标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.database-strategy.complex.sharding-columns** | String | 否 | none | 分库复合分片策略：多分片使用的列名，以逗号分隔 |
-| **sharding.tables.<logic-table-name>.database-strategy.complex.algorithm-class-name** | String | 否 | none | 分库复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
-| **sharding.tables.<logic-table-name>.database-strategy.inline.algorithm-expression** | String | 否 | none | 分库行表达式分片策略：需符合Groovy语法 |
+| **sharding.tables.&lt;logic-table-name&gt;.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.sharding-column** | String | 否 | none | 分表标准分片策略：单分片使用的列名 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分表标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分表标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.sharding-columns** | String | 否 | none | 分表复合分片策略：多分片使用的列名，以逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.algorithm-class-name** | String | 否 | none | 分表复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.inline.algorithm-expression** | String | 否 | none | 分表行表达式分片策略：需符合Groovy语法 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.sharding-column** | String | 否 | none | 分库标准分片策略：单分片使用的列名 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分库标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分库标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.sharding-columns** | String | 否 | none | 分库复合分片策略：多分片使用的列名，以逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.algorithm-class-name** | String | 否 | none | 分库复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.inline.algorithm-expression** | String | 否 | none | 分库行表达式分片策略：需符合Groovy语法 |
 
 
 
