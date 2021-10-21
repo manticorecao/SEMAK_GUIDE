@@ -867,7 +867,16 @@ spring:
 demo-feign:
   url: http://ip-api.com
 ```
+如果，服务方的地址是对等的**集群节点**，那么可以使用**Ribbon**来做**客户端负载**模式的调用。此时的`@FeignClient`注解中，也**不需要**再写url属性。
+
+```yaml
+demo-feign:
+  ribbon:
+    listOfServers: http://ip-api-n1.com,http://ip-api-n2.com
+```
+
 接下来的配置属于个性化配置，主要调整了通讯的超时参数。这些参数可配可不配，不配置时使用全局的默认值。
+
 ```yaml
 feign:
   client:
@@ -882,6 +891,10 @@ feign:
   		demo-feign:
       	connectTimeout: 2000
         readTimeout: 5000
+#客户端负载均衡配置
+ribbon:
+  ConnectTimeout: 5000
+  ReadTimeout: 15000
 ```
 
 
