@@ -458,9 +458,9 @@ mybatis:
 | **mybatis.mapper-locations** | 是 | N/A | Mapper XML文件路径。 |
 | **mybatis.type-aliases-package** | 否 | N/A | 指定类型别名扫描包名(使用英文逗号进行分割)。 |
 | **mybatis.type-handlers-package** | 否 | N/A | 指定类型处理器扫描包名(使用英文逗号进行分割)。 |
-| **mybatis.interceptors.<interceptorName>.enabled** | 否 | true | 启用拦截器。 |
-| **mybatis.interceptors.<interceptorName>.class-name** | 是 | N/A | 拦截器的类名（需提供无参构造方法）。 |
-| **mybatis.interceptors.<interceptorName>.properties** | 否 | N/A | 拦截器属性。 |
+| **mybatis.interceptors.&lt;interceptorName&gt;.enabled** | 否 | true | 启用拦截器。 |
+| **mybatis.interceptors.&lt;interceptorName&gt;.class-name** | 是 | N/A | 拦截器的类名（需提供无参构造方法）。 |
+| **mybatis.interceptors.&lt;interceptorName&gt;.properties** | 否 | N/A | 拦截器属性。 |
 
 **P.S.: 建议配置请参考样例中的属性值**
 

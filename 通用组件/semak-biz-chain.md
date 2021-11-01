@@ -109,8 +109,8 @@ spring:
 | **属性** | **数据类型** | **必填** | **默认值** | **描述** |
 | --- | --- | --- | --- | --- |
 | **spring.biz.chain.enabled** | boolean | 否 | true | 启用业务链功能 |
-| **spring.biz.chain.biz-chains.<chainName>** | String | 否 |  | 业务链名称（**也是BeanName**） |
-| **spring.biz.chain.biz-chains.<chainName>.<units>** | List<String> | 否 |  | 业务单元类的全名 |
+| **spring.biz.chain.biz-chains.&lt;chainName&gt;** | String | 否 |  | 业务链名称（**也是BeanName**） |
+| **spring.biz.chain.biz-chains.&lt;chainName&gt;.<units>** | List<String> | 否 |  | 业务单元类的全名 |
 
 
 ## 4. 执行业务链

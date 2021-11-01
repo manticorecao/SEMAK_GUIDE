@@ -1708,13 +1708,13 @@ spring:
 | **spring.cloud.sentinel.transport.heartbeat-interval-ms** | String | 否 |  | 应用发送心跳到Sentinel控制台的时间间隔（单位：毫秒） |
 | **spring.cloud.sentinel.transport.client-ip** | String | 否 |  | 指定的心跳客户端IP将被注册到Sentinel控制台 |
 | **spring.cloud.sentinel.eager** | boolean | 否 | false | 是否提前触发 Sentinel 初始化 |
-| **spring.cloud.sentinel.datasource** | java.util.Map<String, com.alibaba.cloud.sentinel.datasource.config.DataSourcePropertiesConfiguration> | 否 |  | 数据源配置。Map的Key值，即ruleName可分为：
-`flow` , `degrade` , `system` , `authority` , `param-flow` 。 |
-| **spring.cloud.sentinel.datasource.<ruleName>.nacos.server-addr** | String | 是 |  | Nacos服务地址，多个请用英文逗号分隔 |
-| **spring.cloud.sentinel.datasource.<ruleName>.nacos.data-id** | String | 是 |  | 配置集ID。建议使用 `spring.application.name` + `ruleName` + rules来构成保证唯一性。 |
-| **spring.cloud.sentinel.datasource.<ruleName>.nacos.groud-id** | String | 否 | DEFAULT_GROUP | 配置分组。 |
-| **spring.cloud.sentinel.datasource.<ruleName>.nacos.namespace** | String | 否 |  | 命名空间。建议用于环境隔离 |
-| **spring.cloud.sentinel.datasource.<ruleName>.nacos.rule-type** | com.alibaba.cloud.sentinel.datasource.RuleType | 否 |  | 规则类型 |
+| **spring.cloud.sentinel.datasource** | java.util.Map<String, com.alibaba.cloud.sentinel.datasource.config.DataSourcePropertiesConfiguration> | 否 |  | 数据源配置。Map的Key值，即ruleName可分为：|
+|`flow` , `degrade` , `system` , `authority` , `param-flow` 。 |||||
+| **spring.cloud.sentinel.datasource.&lt;ruleName&gt;.nacos.server-addr** | String | 是 |  | Nacos服务地址，多个请用英文逗号分隔 |
+| **spring.cloud.sentinel.datasource.&lt;ruleName&gt;.nacos.data-id** | String | 是 |  | 配置集ID。建议使用 `spring.application.name` + `ruleName` + rules来构成保证唯一性。 |
+| **spring.cloud.sentinel.datasource.&lt;ruleName&gt;.nacos.groud-id** | String | 否 | DEFAULT_GROUP | 配置分组。 |
+| **spring.cloud.sentinel.datasource.&lt;ruleName&gt;.nacos.namespace** | String | 否 |  | 命名空间。建议用于环境隔离 |
+| **spring.cloud.sentinel.datasource.&lt;ruleName&gt;.nacos.rule-type** | com.alibaba.cloud.sentinel.datasource.RuleType | 否 |  | 规则类型 |
 
 
 

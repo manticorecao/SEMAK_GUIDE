@@ -171,25 +171,25 @@ spring:
 
 | **属性** | **是否必填** | **默认值** | **描述** |
 | :--- | :--- | :--- | :--- |
-| **spring.cloud.stream.binders.<binderName>.type** | 是 |   | 绑定器类型支持：`rabbit`, `kafka` |
-| **spring.cloud.stream.binders.<binderName>.defaultCandidate** | 否 | true | 定义为候选Bean（Primary Bean），多个绑定器只能定义一个为候选Bean |
-| **spring.cloud.stream.binders.<binderName>.environment** | 是 |   | 绑定器相关的环境属性 |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.type** | 是 |   | 绑定器类型支持：`rabbit`, `kafka` |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.defaultCandidate** | 否 | true | 定义为候选Bean（Primary Bean），多个绑定器只能定义一个为候选Bean |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.environment** | 是 |   | 绑定器相关的环境属性 |
 | **使用RabbitMQ Binder时，以下属性按需填写** |  |  |  |
-| **spring.cloud.stream.binders.<binderName>.environment.spring.rabbitmq.host** | 是 |   | RabbitMQ的Broker地址 |
-| **spring.cloud.stream.binders.<binderName>.environment.spring.rabbitmq.port** | 是 |   | RabbitMQ的Broker端口 |
-| **spring.cloud.stream.binders.<binderName>.environment.spring.rabbitmq.username** | 是 |   | RabbitMQ的Broker用户名 |
-| **spring.cloud.stream.binders.<binderName>.environment.spring.rabbitmq.password** | 是 |   | RabbitMQ的Broker密码 |
-| **spring.cloud.stream.binders.<binderName>.environment.spring.rabbitmq.virtual-host** | 是 |   | RabbitMQ的Broker的虚拟主机名称 |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.rabbitmq.host** | 是 |   | RabbitMQ的Broker地址 |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.rabbitmq.port** | 是 |   | RabbitMQ的Broker端口 |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.rabbitmq.username** | 是 |   | RabbitMQ的Broker用户名 |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.rabbitmq.password** | 是 |   | RabbitMQ的Broker密码 |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.rabbitmq.virtual-host** | 是 |   | RabbitMQ的Broker的虚拟主机名称 |
 | **使用Kafka Binder时，以下属性按需填写** |  |  |  |
-| **spring.cloud.stream.binders.<binderName>.environment.spring.cloud.stream.kafka.binder.brokers** | 是 |   | Kafka的Broker地址和端口，多个使用英文逗号分隔 |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.cloud.stream.kafka.binder.brokers** | 是 |   | Kafka的Broker地址和端口，多个使用英文逗号分隔 |
 | **使用RocketMQ Binder时，以下属性按需填写** |  |  |  |
-| **spring.cloud.stream.binders.<binderName>.environment.spring.cloud.stream.rocketmq.binder.name-server** | 否 | 127.0.0.1:9876 | NameServer地址 |
-| **spring.cloud.stream.binders.<binderName>.environment.spring.cloud.stream.rocketmq.binder.enable-msg-trace** | 否 | true | 是否为 Producer 和 Consumer 开启消息轨迹功能 |
-| **spring.cloud.stream.binders.<binderName>.environment.spring.cloud.stream.rocketmq.binder.customized-trace-topic** | 否 | RMQ_SYS_TRACE_TOPIC | 消息轨迹开启后存储的 topic 名称 |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.cloud.stream.rocketmq.binder.name-server** | 否 | 127.0.0.1:9876 | NameServer地址 |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.cloud.stream.rocketmq.binder.enable-msg-trace** | 否 | true | 是否为 Producer 和 Consumer 开启消息轨迹功能 |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.cloud.stream.rocketmq.binder.customized-trace-topic** | 否 | RMQ_SYS_TRACE_TOPIC | 消息轨迹开启后存储的 topic 名称 |
 |  |  |  |  |
-| **spring.cloud.stream.bindings.<channelName>.binder** | 否 | 取默认binder | 消息通道绑定的绑定器名称 |
-| **spring.cloud.stream.bindings.<channelName>.destination** | 是 |   | RabbitMQ的含义为Exchange；Kafka的含义为Topic |
-| **spring.cloud.stream.bindings.<channelName>.group** | 否 |  | 分组名称，消息仅能由相同组内的一个消费者消费 |
+| **spring.cloud.stream.bindings.&lt;channelName&gt;.binder** | 否 | 取默认binder | 消息通道绑定的绑定器名称 |
+| **spring.cloud.stream.bindings.&lt;channelName&gt;.destination** | 是 |   | RabbitMQ的含义为Exchange；Kafka的含义为Topic |
+| **spring.cloud.stream.bindings.&lt;channelName&gt;.group** | 否 |  | 分组名称，消息仅能由相同组内的一个消费者消费 |
 
 - **binderName**: 绑定器名称
 - **channelName**: 消息通道名称
@@ -207,7 +207,7 @@ spring:
 
 
 #### 4.3.1. RabbitMQ专有属性
-`spring.cloud.stream.rabbit.bindings.``<channelName>`节点下的属性为RabbitMQ中间件特有的属性配置，主要分为**消费者属性**和**生产者属性**。
+`spring.cloud.stream.rabbit.bindings.<channelName>`节点下的属性为RabbitMQ中间件特有的属性配置，主要分为**消费者属性**和**生产者属性**。
 
 - [消费者属性](https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_rabbitmq_consumer_properties)
 - [生产者属性](https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_rabbit_producer_properties)
@@ -215,7 +215,7 @@ spring:
 
 
 #### 4.3.2. Kafka专有属性
-`spring.cloud.stream.kafka.bindings.``<channelName>`节点下的属性为Kafka中间件特有的属性配置，主要分为**消费者属性**和**生产者属性**。
+`spring.cloud.stream.kafka.bindings.<channelName>`节点下的属性为Kafka中间件特有的属性配置，主要分为**消费者属性**和**生产者属性**。
 
 - [消费者属性](https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_kafka_consumer_properties)
 - [生产者属性](https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#_kafka_producer_properties)
@@ -223,7 +223,7 @@ spring:
 
 
 #### 4.3.3. RocketMQ专有属性
-`spring.cloud.stream.rocketmq.bindings.``<channelName>`节点下的属性为Kafka中间件特有的属性配置，主要分为**消费者属性**和**生产者属性**。
+`spring.cloud.stream.rocketmq.bindings.<channelName>`节点下的属性为Kafka中间件特有的属性配置，主要分为**消费者属性**和**生产者属性**。
 
 - [消费者属性](https://github.com/alibaba/spring-cloud-alibaba/wiki/RocketMQ#rocketmq-consumer-properties)
 - [生产者属性](https://github.com/alibaba/spring-cloud-alibaba/wiki/RocketMQ#rocketmq-provider-properties)
