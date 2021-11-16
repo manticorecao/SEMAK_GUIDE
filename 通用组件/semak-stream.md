@@ -184,6 +184,8 @@ spring:
 | **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.cloud.stream.kafka.binder.brokers** | 是 |   | Kafka的Broker地址和端口，多个使用英文逗号分隔 |
 | **使用RocketMQ Binder时，以下属性按需填写** |  |  |  |
 | **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.cloud.stream.rocketmq.binder.name-server** | 否 | 127.0.0.1:9876 | NameServer地址 |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.cloud.stream.rocketmq.binder.access-key** | 否 |  | Access Key |
+| **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.cloud.stream.rocketmq.binder.secret-key** | 否 |  | Secret Key |
 | **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.cloud.stream.rocketmq.binder.enable-msg-trace** | 否 | true | 是否为 Producer 和 Consumer 开启消息轨迹功能 |
 | **spring.cloud.stream.binders.&lt;binderName&gt;.environment.spring.cloud.stream.rocketmq.binder.customized-trace-topic** | 否 | RMQ_SYS_TRACE_TOPIC | 消息轨迹开启后存储的 topic 名称 |
 |  |  |  |  |
