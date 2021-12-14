@@ -794,9 +794,9 @@ spring:
 | **属性** | **数据类型** | **必填** | **默认值** | **描述** |
 | :--- | :--- | :--- | :--- | :--- |
 | **spring.cors.enabled** | boolean | 否 | false | 开启跨域支持 |
-| **spring.cors.allowed-origins** | String 或 List<String> | 否 |   | 允许的主机列表，全部允许设置为`*` |
-| **spring.cors.allowed-headers** | String 或 List<String> | 否 |   | 允许的Header列表，全部允许设置为`*` |
-| **spring.cors.allowed-methods** | String 或 List<String> | 否 |   | 允许的请求Method列表，全部允许设置为`*` |
+| **spring.cors.allowed-origins** | String 或 List&lt;String&gt; | 否 |   | 允许的主机列表，全部允许设置为`*` |
+| **spring.cors.allowed-headers** | String 或 List&lt;String&gt; | 否 |   | 允许的Header列表，全部允许设置为`*` |
+| **spring.cors.allowed-methods** | String 或 List&lt;String&gt; | 否 |   | 允许的请求Method列表，全部允许设置为`*` |
 
 
 
@@ -1629,7 +1629,7 @@ public void getUserList() {
 `semak-rest` 组件使用了 `Sentinel` 来保护服务，主要体现在流量控制、熔断降级等关键方面。为了保障 `Sentinel` 中的规则/策略能动态实时地应用到集群应用节点，这里部署的 `Sentinel-Dashboard` 服务是整合了 `Nacos Config` 服务，进而达成了规则/策略的动态更新。
 
 
-> 整合了 `Nacos Config` 服务的 `Sentinel-Dashboard` 的源码位置（私有仓库）：[https://github.com/manticorecao/sentinel/tree/feature/dashboard-based-nacos/sentinel-dashboard](https://github.com/manticorecao/sentinel/tree/feature/dashboard-based-nacos/sentinel-dashboard)。
+> 整合了 `Nacos Config` 服务的 `Sentinel-Dashboard` 的源码位置（私有仓库）：https://github.com/manticorecao/Sentinel/tree/master/sentinel-dashboard。
 
 由于 `Sentinel-Dashboard` 服务的搭建不在讨论范围内，故此处不再赘述。
 
@@ -1659,7 +1659,7 @@ spring:
         dashboard: 127.0.0.1:8280
       eager: true
       datasource:
-        #流制规则
+        #流控规则
         flow:
           nacos:
             server-addr: ${nacos.server-addr}
@@ -1707,8 +1707,7 @@ spring:
 | **spring.cloud.sentinel.transport.heartbeat-interval-ms** | String | 否 |  | 应用发送心跳到Sentinel控制台的时间间隔（单位：毫秒） |
 | **spring.cloud.sentinel.transport.client-ip** | String | 否 |  | 指定的心跳客户端IP将被注册到Sentinel控制台 |
 | **spring.cloud.sentinel.eager** | boolean | 否 | false | 是否提前触发 Sentinel 初始化 |
-| **spring.cloud.sentinel.datasource** | java.util.Map<String, com.alibaba.cloud.sentinel.datasource.config.DataSourcePropertiesConfiguration> | 否 |  | 数据源配置。Map的Key值，即ruleName可分为：|
-|`flow` , `degrade` , `system` , `authority` , `param-flow` 。 |||||
+| **spring.cloud.sentinel.datasource** | `java.util.Map<String, com.alibaba.cloud.sentinel.datasource.config.DataSourcePropertiesConfiguration>` | 否 |  | 数据源配置。Map的Key值，即ruleName可分为：<br/>`flow` , `degrade` , `system` , `authority` , `param-flow` 。 |
 | **spring.cloud.sentinel.datasource.&lt;ruleName&gt;.nacos.server-addr** | String | 是 |  | Nacos服务地址，多个请用英文逗号分隔 |
 | **spring.cloud.sentinel.datasource.&lt;ruleName&gt;.nacos.data-id** | String | 是 |  | 配置集ID。建议使用 `spring.application.name` + `ruleName` + rules来构成保证唯一性。 |
 | **spring.cloud.sentinel.datasource.&lt;ruleName&gt;.nacos.groud-id** | String | 否 | DEFAULT_GROUP | 配置分组。 |
@@ -1731,7 +1730,7 @@ public Response<String> appHello(@PathVariable("name")String name) {
         Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
     }
     if("exception".equals(name)){
-        throw new BizException(12345, "hello, biz exception");
+        throw new BizException(-99999, "hello, biz exception");
     }
     return Response.ofSuccess("Hello!! " + name);
 }
@@ -1746,8 +1745,14 @@ public Response<String> appHelloBlockHandler(String name, BlockException e){
 }
 ```
 
-当上述配置完成并启动引用时，我们可以看到 `Sentinel-Dashboard` 上已经将 `semak-rest-demo` 应用实例显示出来：
-![image.png](.assets/1593581927674-b30fa233-1db4-4655-9bf2-9e3e13728116.png)
+当上述配置完成并启动应用后，使用curl调用一下接口`curl http://localhost:8080/demo/app_hello/aaa`，我们可以看到 `Sentinel-Dashboard` 上已经将 `semak-rest-demo` 应用实例的监控显示出来：
+![image-20211213140552554](.assets/image-20211213140552554.png)
+
+可能出现的问题：
+
+* 实时监控不显示：调用接口后，停止一段时间，监控获取不到新的数据，会停止显示；另外，请检查**Sentinel Dashboard**服务回调应用的IP是否打通（不同网段，路由表设置等问题），从日志中可以看出来（如下）。
+
+  ![image-20211208104131607](.assets/image-20211208104131607.png)
 
 
 
@@ -1768,40 +1773,39 @@ public Response<String> appHelloBlockHandler(String name, BlockException e){
 
 Sentinel 并发控制不负责创建和管理线程池，而是**简单统计当前请求上下文的线程数目**（正在执行的调用数目），如果超出阈值，新的请求会被立即拒绝，效果类似于信号量隔离。
 
-
 **配置并发线程数的流控规则的步骤：**
 
 
-1. 登录Sentinel控制台，点选当前应用，如这里的 `semak-rest-demo` 。在展开的菜单中点选 **流控规则-Nacos** ，这里的规则配置会在此应用的所有服务节点上生效。
-
-   ![image.png](.assets/1593583906006-ca3d0579-8eae-490d-9e44-54496f818a99.png)
+1. 登录Sentinel控制台，点选当前应用，如这里的 `semak-rest-demo` 。在展开的菜单中点选 **流控规则** ，这里的规则配置会在此应用的所有服务节点上生效。
 
 2. 点击右上角按钮 **新增流控规则**，分别配置**资源名**、**阈值类型**和**单机阈值**。配置完成后，点选**新增按钮**，这条规则就在应用服务侧更新完毕了。
 
-   ![image.png](.assets/1593584147513-285b4b67-9365-4b2c-b139-3a1384e3e3dc.png)
+   ![image-20211213140829003](.assets/image-20211213140829003.png)
 
    - 资源名为 `@SentinelResource` 中的 `value` 属性值。
 
    - 阈值类型选择**线程数**。
 
-   - 单机阈值选输入**5**，即同时处理当前资源的线程数不超过5个。
+   - 单机阈值选输入**3**，即单个服务节点同时处理当前资源的线程数不超过3个。
 
-     ![image.png](.assets/1593585057441-a4e24766-6d70-4523-a7ce-0f211e8f4c08.png)
+3. 在**Sentinel Dashboard**上配置完成后，我们可以看到**Nacos**的配置中自动添加了一条**Sentinel**的流控规则，且即时生效。
 
-3. 基于上面应用配置的样例，我们执行一次 `curl -X GET "http://localhost:8080/demo/appHello/sleep" -H "accept: application/json"` ，返回结果如下：
-
-   ![image](.assets/1593585166020-7bc19cb2-6618-45b8-85ff-a12b4ab2e7d8-1258869.png)
+   ![image-20211213141111904](.assets/image-20211213141111904.png)
    
-   然后，我们分出6个会话窗口同时执行，让 `demoFacade.appHello` 占满5个以上线程，就会发现，其中一个会话窗口的返回的报文内容为降级后的输出，故其请求的流量被拒绝了。
-   ![image.png](.assets/1593585643907-69126423-85fd-4d1f-90b0-fa5e11b95bee.png)
+3. 基于上面应用配置的样例，我们执行一次 `curl -X GET "http://localhost:8080/demo/appHello/sleep" -H "accept: application/json"` ，返回结果如下：
+
+   ![image-20211213141158757](.assets/image-20211213141158757.png)
+   
+   然后，我们分出4个会话窗口同时执行，让 `demoFacade.appHello` 占满3个以上线程，就会发现，其中一个会话窗口的返回的报文内容为降级后的输出，故其请求的流量被拒绝了。
+   ![image-20211213141329207](.assets/image-20211213141329207.png)
    查看 `Sentinel` 控制台的实时监控，的确也是如此。通过5个QPS，拒绝了1个QPS。
-   ![image.png](.assets/1593585522102-95227b8e-7df6-45dd-b81f-fb56fe65723d.png)
+   ![image-20211213141504494](.assets/image-20211213141504494.png)
 
 
 
 ##### 4.2.1.2. QPS流量控制
 
-和并发线程数控制不同，5个并发线程如果每个处理效率不同，其QPS是不定的。有时候，为了更精确的控制QPS，需要用到QPS的流量控制规则。
+和并发线程数控制不同，3个并发线程如果每个处理效率不同，其QPS是不定的。有时候，为了更精确的控制QPS，需要用到QPS的流量控制规则。
 
 所谓QPS流量控制，就是当QPS超过某个阈值的时候，则采取措施进行流量控制。流量控制的效果包括以下几种：**直接拒绝**、**Warm Up**、**匀速排队**。
 
@@ -1823,29 +1827,26 @@ Sentinel 并发控制不负责创建和管理线程池，而是**简单统计当
 
 > 此处样例仅以**直接拒绝**的流控效果做演示，其他流控效果，请同学们自己查阅官方文档，进行调试，这里就不再赘述了。
 
-1. 登录Sentinel控制台，点选当前应用，如这里的 `semak-rest-demo` 。在展开的菜单中点选 **流控规则-Nacos** ，这里的规则配置会在此应用的所有服务节点上生效。
-
-   ![image.png](.assets/1593583906006-ca3d0579-8eae-490d-9e44-54496f818a99-20210902171448727.png)
+1. 登录Sentinel控制台，点选当前应用，如这里的 `semak-rest-demo` 。在展开的菜单中点选 **流控规则** ，这里的规则配置会在此应用的所有服务节点上生效。
 
 2. 点击右上角按钮 **新增流控规则**，分别配置**资源名**、**阈值类型**和**单机阈值**，高级选型保持默认即可。配置完成后，点选**新增按钮**，这条规则就在应用服务侧更新完毕了。
 
-   ![image.png](.assets/1593587103439-17f7fdf6-a968-4ccc-afc4-919104486905.png)
+   ![image-20211213141708704](.assets/image-20211213141708704.png)
 
    * 资源名为 `@SentinelResource` 中的 `value` 属性值。
 
    * 阈值类型选择期望设置的QPS值。
 
-   * 单机阈值选输入**150**，即150QPS。
-
-     ![image.png](.assets/1593587483397-0f9effc0-4152-4c56-8aaa-27eee0263bba.png)
+   * 单机阈值选输入**100**，即150QPS。
 
 
-3. 基于上面应用配置的样例，我们用JMeter进行一次60秒的接口压力测试，并发数为2，测试报告如下：
 
-   ![image.png](.assets/1593588872934-e945a0ea-164e-422d-9c8d-5c79f4833830.png)
-   按照整体吞吐量（QPS）和错误比率来算，大致的QPS应该是 `3041.5*(1-0.9502)=151.4667` ，折算部分损耗，十分接近我们所设定的150QPS的值了。再查看 `Sentinel` 控制台的实时监控，整个压测过程通过150个QPS，拒绝了2000~3000+个QPS，数据与测试报告基本吻合。
+3. 基于上面应用配置的样例，我们用JMeter进行一次60秒的接口压力测试（请求相对路径为`/demo/app_hello/aaa`），并发数为10，测试报告如下：
 
-   ![image.png](.assets/1593588817167-1759f432-ee30-4597-b247-ecaaa8048454.png)
+   ![image-20211213145529109](.assets/image-20211213145529109.png)
+   按照整体吞吐量（QPS)和错误比率来算，大致的QPS应该是 `3885.6*(1-0.9744)=99.47` ，折算部分损耗，十分接近我们所设定的100QPS的值了。再查看 `Sentinel` 控制台的实时监控，整个压测过程通过100个QPS，拒绝了2000~3000+个QPS，数据与测试报告基本吻合。
+
+   ![image-20211213145510736](.assets/image-20211213145510736.png)
 
 
 
@@ -1861,8 +1862,15 @@ Sentinel 并发控制不负责创建和管理线程池，而是**简单统计当
 
 我们通常用以下几种方式来衡量资源是否处于稳定的状态：
 
-- **平均响应时间**：当 1s 内持续进入 N 个请求，对应时刻的平均响应时间（秒级）均超过阈值（以 ms 为单位），那么在接下的时间窗口（以 s 为单位）之内，对这个方法的调用都会自动地熔断（抛出 `DegradeException`）。注意 Sentinel 默认统计的 RT（响应时间） 上限是 4900 ms，**超出此阈值的都会算作 4900 ms**，若需要变更此上限可以通过启动配置项 `-Dcsp.sentinel.statistic.max.rt=xxx` 来配置。
+- **慢调用比例**：选择以慢调用比例作为阈值，需要设置允许的慢调用 RT（即最大的响应时间），请求的响应时间大于该值则统计为慢调用。当单位统计时长（`statIntervalMs`）内请求数目大于设置的最小请求数目，并且慢调用的比例大于阈值，则接下来的熔断时长内请求会自动被熔断。经过熔断时长后熔断器会进入探测恢复状态（HALF-OPEN 状态），若接下来的一个请求响应时间小于设置的慢调用 RT 则结束熔断，若大于设置的慢调用 RT 则会再次被熔断。
+
+  - **比例阈值**：慢调用统计数对于最小请求数的占有比例；
+
+  - **熔断时长**：超过时间后会尝试恢复；
+  - **最小请求数**：触发熔断的最小请求数目，若当前统计窗口内的请求数小于此值，即使达到了熔断条件也不会触发。
+
 - **异常比例**：当资源的每秒请求量 >= N（可配置），并且每秒异常总数占通过量的比值超过阈值之后，资源进入降级状态，即在接下的时间窗口（以 s 为单位）之内，对这个方法的调用都会自动地返回。异常比率的阈值范围是 `[0.0, 1.0]`，代表 0% - 100%。
+
 - **异常数**：当资源近 1 分钟的异常数目超过阈值之后会进行熔断。注意由于统计时间窗口是分钟级别的，若 `timeWindow` 小于 60s，则结束熔断状态后仍可能再进入熔断状态。
 
 需要注意的是，在下面这段样例代码中，我们可以发现两个降级处理方法，即 `blockHandler` 指向的 `appHelloBlockHandler` 和 `fallback` 指向的 `appHelloFallback` 。
@@ -1875,7 +1883,7 @@ public Response<String> appHello(@PathVariable("name")String name) {
         Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
     }
     if("exception".equals(name)){
-        throw new BizException(12345, "hello, biz exception");
+        throw new BizException(-99999, "hello, biz exception");
     }
     return Response.ofSuccess("Hello!! " + name);
 }
@@ -1896,41 +1904,55 @@ public Response<String> appHelloBlockHandler(String name, BlockException e){
 
 
 
-**配置RT降级策略的步骤：**
+**配置慢调用比例熔断规则的步骤：**
 
-> 此处样例仅以**RT降级策略**的降级效果做演示，模拟服务调用超时情况。其他策略，请同学们自己查阅官方文档，进行调试，这里就不再赘述了。
+> 此处样例仅以**慢调用比例熔断规则**的降级效果做演示，模拟服务调用超时情况。其他策略，请同学们自己查阅官方文档，进行调试，这里就不再赘述了。
 
-1. 在没有RT降级规则的情况下，用JMeter调用一个会休眠2秒的方法，2个并发调用60秒的测试报告如下：
+1. 调整sleep代码：
 
-   ![image.png](.assets/1593593675934-74593b13-06fc-4b7c-8667-b995b20ffc05.png)
-   虽然QPS非常低，只有 `59.4/60=0.99` ，但是没有任何错误。这样的话，在并发更高的情况下，会耗尽应用资源。
+   ```java
+   if("sleep".equals(name)){
+       int s = DateTime.now().secondOfMinute().get();
+       if ( s > 5 && s < 15 || s > 25 && s < 35 || s > 45 && s < 55) {
+           Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
+       } else {
+           Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+       }
+   }
+   ```
 
-2. 那么，现在我们要为这个方法设置一个RT降级规则。登录Sentinel控制台，点选当前应用，如这里的 `semak-rest-demo` 。在展开的菜单中点选 **降级规则** ，这里的规则配置会在此应用的所有服务节点上生效。
+   这样调整的目的是为了能看出整个过程中规则运作的曲线是否符合预期。
 
-   ![image.png](.assets/1593593409033-cb6ed444-4e4b-42eb-8154-6bc5fceca877.png)
+2. 那么，现在我们要为这个方法设置一个**慢调用比例熔断规则**。登录Sentinel控制台，点选当前应用，如这里的 `semak-rest-demo` 。在展开的菜单中点选 **熔断规则** ，这里的规则配置会在此应用的所有服务节点上生效。
 
+3. 点击右上角按钮 **新增熔断规则**，分别配置**资源名**、**熔断策略**、**最大RT**、**比例阈值**、**熔断时长**、**最小请求数**和**统计时长**。配置完成后，点选**新增按钮**，这条规则就在应用服务侧更新完毕了。
 
-3. 点击右上角按钮 **新增降级规则**，分别配置**资源名**、**降级策略、RT**和**时间窗口**。配置完成后，点选**新增按钮**，这条规则就在应用服务侧更新完毕了。
+   ![image-20211213151008894](.assets/image-20211213151008894.png)
 
-   ![image.png](.assets/1593594100000-2efca22b-334f-4b2c-b857-857d7308f2d0-20210902172111487.png)
+   - 资源名为 `@SentinelResource` 中的 `value` 属性值。
+   - 熔断策略选择慢调用比例。
+   - 最大RT值设置为100ms。
+   - 比例阈值设置为0.3（慢调用的比例大于阈值，则接下来的熔断时长内请求会自动被熔断）。
+   - 熔断时长设置为5秒。
+   - 最小请求数设置为10个（熔断触发的最小请求数，请求数小于该值时即使异常比率超出阈值也不会熔断）。
 
-   * 资源名为 `@SentinelResource` 中的 `value` 属性值。
-   * 降级策略选择RT-响应时间。
-   * RT值设置为100ms。
-   * 时间窗口设置为5秒。
+4. 在**Sentinel Dashboard**上配置完成后，我们可以看到**Nacos**的配置中自动添加了一条**Sentinel**的降级规则，且即时生效。
 
-4. 在配置好RT降级规则的情况下，再用JMeter调用一个会休眠2秒的方法，2个并发调用60秒的测试报告如下，我们用响应时间的聚合图表看起来会更加直观：
+   ![image-20211213151110461](.assets/image-20211213151110461.png)
 
-   ![image.png](.assets/1593595014098-855421c4-3791-4a9d-aae3-716ef916279c.png)
+5. 在配置好**慢调用比例熔断规则**的情况下，再用JMeter调用sleep的接口，30个并发调用180秒的测试报告如下，我们用响应时间的聚合图表看起来会更加直观。
 
-   - 上图**红色箭头**指向的波峰响应时间较大，说明正在正常调用服务，但服务响应慢。
-   - 上图**绿色箭头**指向的波谷响应时间极小，说明触发了RT降级规则，服务进入了熔断的时间窗口，直接返回了降级的响应报文。
+   ![image-20211214092400745](.assets/image-20211214092400745.png)
 
-再查看Sentinel控制台的实时监控图形如下：
+   * 在正常区间调用一段时间后，一旦有超过阈值设定响应时间的请求，就会触发熔断机制，并进入熔断窗口。
+   * 在半开尝试接受请求并符合阈值区间后，断路器关闭，后面的请求会正常进入。
 
-![image.png](.assets/1593594973779-4a03c688-599a-470c-bbbb-871a59986291.png)
+   再查看Sentinel控制台的实时监控图形如下：
 
-   - 上图**绿色箭头**指向的波谷响QPS全部通过，说明正在正常调用服务，但服务响应慢。
-   - 上图**红色箭头**指向的波峰为拒绝的QPS，说明触发了RT降级规则，服务进入了熔断的时间窗口，直接返回了降级的响应报文。
+   ![image-20211214092335507](.assets/image-20211214092335507.png)
 
-在设置了RT降级规则的情况下，测试报告和控制台监控的数据也是高度吻合。
+   - 上图**绿色部分**指向的波谷QPS全部通过，说明正在正常调用服务。
+   - 上图**蓝色部分**指向的波峰为拒绝的QPS，说明触发了熔断规则，服务进入了熔断的时间窗口，直接返回了降级的响应报文。
+
+   在设置了**慢调用比例熔断规则**的情况下，测试报告和控制台监控的数据也是高度吻合。
+
