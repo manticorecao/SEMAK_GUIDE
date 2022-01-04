@@ -225,11 +225,35 @@ spring:
 
 
 #### 4.3.3. RocketMQ专有属性
-`spring.cloud.stream.rocketmq.bindings.<channelName>`节点下的属性为Kafka中间件特有的属性配置，主要分为**消费者属性**和**生产者属性**。
+`spring.cloud.stream.rocketmq.bindings.<channelName>`节点下的属性为RocketMQ中间件特有的属性配置，主要分为**消费者属性**和**生产者属性**。
 
 - [消费者属性](https://github.com/alibaba/spring-cloud-alibaba/wiki/RocketMQ#rocketmq-consumer-properties)
 - [生产者属性](https://github.com/alibaba/spring-cloud-alibaba/wiki/RocketMQ#rocketmq-provider-properties)
 
+> 当RocketMQ集群开启了`权限控制(acl)`后，需要在`binder`中添加`AccessKey`和`SecretKey`，可参考下方配置：
+
+```yaml
+spring:
+  cloud:
+    stream:
+      binders:
+        bizRocketmq:
+          type: rocketmq
+          defaultCandidate: true
+          environment:
+            spring:
+              cloud:
+                stream:
+                  rocketmq:
+                    binder:
+                      name-server: xx.xx.xx.xx:xx
+                      enable-msg-trace: true
+                      customized-trace-topic: xx
+                      # 看以下几行即可
+                      # 如果rocketMQ开启了acl，请务必配置开启下方配置，具体值请联系rocketmq中间件负责人
+                      # access-key: xx
+                      # secret-key: xx
+```
 
 
 ## 5. 使用方式
