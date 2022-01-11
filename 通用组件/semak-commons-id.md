@@ -19,7 +19,7 @@
 
 1. Open JDK 1.8+，并已配置有效的环境变量。
 1. Maven 3.3.x+，并已配置有效的环境变量。
-1. 已部署的Leaf服务（2个节点以上），源码来源：https://github.com/manticorecao/Leaf，在原有框架上添加了部分增加功能。
+1. 已部署的Leaf服务（2个节点以上），源码来源：https://github.com/manticorecao/Leaf ， 在原有框架上添加了部分增加功能。
 
 
 
@@ -215,3 +215,4 @@ id:2219131302580320
 
 * 绑定**IdServiceClient**接口。
 * 利用**getMonoIncrSnowflake**方法来生成**单调递增**的ID。
+
