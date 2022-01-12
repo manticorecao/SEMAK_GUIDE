@@ -6,7 +6,7 @@
 1. 支持读写分离功能。
 2. 支持分库和分表功能。
 3. 分片策略定制化，支持基于`=`，`BETWEEN`，`IN`的分片。
-4. 无中心化分布式主键。
+4. 支持多种分布式主键生成策略。
 5. 跨库事务支持。
 
 
@@ -176,7 +176,7 @@
 
    - 不分片策略
 
-     对应`NoneShardingStrategy`。不分片的策略。
+     对应`ShardingStrategy`。不分片的策略。
 
 
 
@@ -582,7 +582,7 @@ ds$->{id % 10}
 传统数据库软件开发中，主键自动生成技术是基本需求。而各个数据库对于该需求也提供了相应的支持，比如MySQL的自增键，Oracle的自增序列等。 数据分片后，不同数据节点生成全局唯一主键是非常棘手的问题。同一个逻辑表内的不同实际表之间的自增键由于无法互相感知而产生重复主键。 虽然可通过约束自增主键初始值和步长的方式避免碰撞，但需引入额外的运维规则，使解决方案缺乏完整性和可扩展性。
 
 
-目前有许多第三方解决方案可以完美解决这个问题，如UUID等依靠特定算法自生成不重复键，或者通过引入主键生成服务等。为了方便用户使用、满足不同用户不同使用场景的需求， 组件不仅提供了内置的分布式主键生成器，例如：UUID、SNOWFLAKE、ZK_BASED_SNOWFLAKE，Redis/Codis(进行中)、LEAF(进行中)，还抽离出分布式主键生成器的接口，方便用户自行实现自定义的自增主键生成器。
+目前有许多第三方解决方案可以完美解决这个问题，如UUID等依靠特定算法自生成不重复键，或者通过引入主键生成服务等。为了方便用户使用、满足不同用户不同使用场景的需求， 组件不仅提供了内置的分布式主键生成器，例如：UUID、SNOWFLAKE、ZK_BASED_SNOWFLAKE，Redis/Codis(进行中)、LEAF(美团开源)，还抽离出分布式主键生成器的接口，方便用户自行实现自定义的自增主键生成器。
 
 
 ##### 2.2.4.2. 内置的主键生成器
@@ -634,9 +634,17 @@ ds$->{id % 10}
 
   ![](.assets/1590744537540-72a4561d-da15-4f2e-9da8-4862f2b26f6f.png)
 
-- **ZK_BASED_SNOWFLAKE**
+- **ZK_BASED_SNOWFLAKE** (不再建议使用，使用Leaf替换)
 
   在SNOWFLAKE算法的基础上，通过Zookeeper协调自动生成唯一的**工作进程位(10bit)**，以方便集群化部署。
+
+* **LEAF_SEGMENT**
+
+  通过访问Leaf服务节点，获取趋势递增(多节点)/单调递增(多节点)的号段ID。
+
+* **LEAF_SNOWFLAKE**
+
+​		通过访问Leaf服务节点，获取趋势递增(多节点)/单调递增(多节点)的基于SNOWFLAKE算法(含10bit工作进程位)的ID。
 
 
 
@@ -813,9 +821,9 @@ spring:
 | 属性 | 数据 类型 | 是否必填 | 默认值 | 描述 |
 | :--- | :--- | :--- | :--- | :--- |
 | **enabled** | Boolean | 否 | true | 是否启用组件 |
-| **datasource.names** | String | 是 | none | 使用的数据源名称，多个数据源用英文逗号分隔 |
-| **masterslave.master-data-source-name** | String | 是 | none | 主库数据源名称 |
-| **masterslave.slave-data-source-names** | String | 是 | none | 从库数据源名称列表，多个数据源用英文逗号分隔 |
+| **datasource.names** | String | 是 |  | 使用的数据源名称，多个数据源用英文逗号分隔 |
+| **masterslave.master-data-source-name** | String | 是 |  | 主库数据源名称 |
+| **masterslave.slave-data-source-names** | String | 是 |  | 从库数据源名称列表，多个数据源用英文逗号分隔 |
 | **masterslave.load-balance-algorithm-type** | String | 否 | ROUND_ROBIN | 从库负载均衡算法(需实现MasterSlaveLoadBalanceAlgorithm接口) |
 
 
@@ -1283,18 +1291,18 @@ spring:
 | 属性 | 数据类型 | 是否必填 | 默认值 | 描述 |
 | :--- | :--- | :--- | :--- | :--- |
 | **enabled** | Boolean | 否 | true | 是否启用组件 |
-| **datasource.names** | String | 是 | none | 使用的数据源名称，多个数据源用英文逗号分隔 |
-| **sharding.default-key-generator.type** | String | 是 | none | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE和ZK_BASED_SNOWFLAKE |
-| **sharding.default-key-generator.column** | String | 是 | none | 自增列名称 |
-| **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
-| **sharding.binding-tables** | List | 否 | none | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
-| **sharding.tables.&lt;logic-table-name&gt;.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.sharding-column** | String | 否 | none | 分表标准分片策略：单分片使用的列名 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分表标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分表标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.sharding-columns** | String | 否 | none | 分表复合分片策略：多分片使用的列名，以逗号分隔 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.algorithm-class-name** | String | 否 | none | 分表复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.inline.algorithm-expression** | String | 否 | none | 分表行表达式分片策略：需符合Groovy语法 |
+| **datasource.names** | String | 是 |  | 使用的数据源名称，多个数据源用英文逗号分隔 |
+| **sharding.default-key-generator.type** | String | 是 |  | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE、ZK_BASED_SNOWFLAKE、LEAF_SEGMENT和LEAF_SNOWFLAKE |
+| **sharding.default-key-generator.column** | String | 是 |  | 自增列名称 |
+| **sharding.default-key-generator.props** | Properties | 是 |  | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性<br/>3. 使用LEAF_SEGMENT算法，参看 [9. 基于LEAF的分布式主键配置](#_9-基于LEAF的分布式主键配置)<br/>4. 使用LEAF_SNOWFLAKE算法，参看 [9. 基于LEAF的分布式主键配置](#_9-基于LEAF的分布式主键配置) |
+| **sharding.binding-tables** | List | 否 |  | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.actual-data-nodes** | String | 否 |  | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.sharding-column** | String | 否 |  | 分表标准分片策略：单分片使用的列名 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.precise-algorithm-class-name** | String | 否 |  | 分表标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.range-algorithm-class-name** | String | 否 |  | 分表标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.sharding-columns** | String | 否 |  | 分表复合分片策略：多分片使用的列名，以逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.algorithm-class-name** | String | 否 |  | 分表复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.inline.algorithm-expression** | String | 否 |  | 分表行表达式分片策略：需符合Groovy语法 |
 
 
 
@@ -1667,19 +1675,19 @@ spring:
 | 属性 | 数据类型 | 是否必填 | 默认值 | 描述 |
 | :--- | :--- | :--- | :--- | :--- |
 | **enabled** | Boolean | 否 | true | 是否启用组件 |
-| **default-data-source-name** | String | 是 | none | 默认数据源，未配置分片规则的表将通过默认数据源定位 |
-| **datasource.names** | String | 是 | none | 使用的数据源名称，多个数据源用英文逗号分隔 |
-| **sharding.default-key-generator.type** | String | 是 | none | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE和ZK_BASED_SNOWFLAKE |
-| **sharding.default-key-generator.column** | String | 是 | none | 自增列名称 |
-| **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
-| **sharding.binding-tables** | List | 否 | none | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
-| **sharding.tables.&lt;logic-table-name&gt;.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.sharding-column** | String | 否 | none | 分库标准分片策略：单分片使用的列名 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分库标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分库标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.sharding-columns** | String | 否 | none | 分库复合分片策略：多分片使用的列名，以逗号分隔 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.algorithm-class-name** | String | 否 | none | 分库复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.inline.algorithm-expression** | String | 否 | none | 分库行表达式分片策略：需符合Groovy语法 |
+| **default-data-source-name** | String | 是 |  | 默认数据源，未配置分片规则的表将通过默认数据源定位 |
+| **datasource.names** | String | 是 |  | 使用的数据源名称，多个数据源用英文逗号分隔 |
+| **sharding.default-key-generator.type** | String | 是 |  | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE、ZK_BASED_SNOWFLAKE、LEAF_SEGMENT和LEAF_SNOWFLAKE |
+| **sharding.default-key-generator.column** | String | 是 |  | 自增列名称 |
+| **sharding.default-key-generator.props** | Properties | 是 |  | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性<br/>3. 使用LEAF_SEGMENT算法，参看 [9. 基于LEAF的分布式主键配置](#_9-基于LEAF的分布式主键配置)<br/>4. 使用LEAF_SNOWFLAKE算法，参看 [9. 基于LEAF的分布式主键配置](#_9-基于LEAF的分布式主键配置) |
+| **sharding.binding-tables** | List | 否 |  | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.actual-data-nodes** | String | 否 |  | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.sharding-column** | String | 否 |  | 分库标准分片策略：单分片使用的列名 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.precise-algorithm-class-name** | String | 否 |  | 分库标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.range-algorithm-class-name** | String | 否 |  | 分库标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.sharding-columns** | String | 否 |  | 分库复合分片策略：多分片使用的列名，以逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.algorithm-class-name** | String | 否 |  | 分库复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.inline.algorithm-expression** | String | 否 |  | 分库行表达式分片策略：需符合Groovy语法 |
 
 
 
@@ -2049,25 +2057,25 @@ spring:
 | 属性 | 数据类型 | 是否必填 | 默认值 | 描述 |
 | :--- | :--- | :--- | :--- | :--- |
 | **enabled** | Boolean | 否 | true | 是否启用组件 |
-| **default-data-source-name** | String | 是 | none | 默认数据源，未配置分片规则的表将通过默认数据源定位 |
-| **datasource.names** | String | 是 | none | 使用的数据源名称，多个数据源用英文逗号分隔 |
-| **sharding.default-key-generator.type** | String | 是 | none | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE和ZK_BASED_SNOWFLAKE |
-| **sharding.default-key-generator.column** | String | 是 | none | 自增列名称 |
-| **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
-| **sharding.binding-tables** | List | 否 | none | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
-| **sharding.tables.&lt;logic-table-name&gt;.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.sharding-column** | String | 否 | none | 分表标准分片策略：单分片使用的列名 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分表标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分表标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.sharding-columns** | String | 否 | none | 分表复合分片策略：多分片使用的列名，以逗号分隔 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.algorithm-class-name** | String | 否 | none | 分表复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.inline.algorithm-expression** | String | 否 | none | 分表行表达式分片策略：需符合Groovy语法 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.sharding-column** | String | 否 | none | 分库标准分片策略：单分片使用的列名 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分库标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分库标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.sharding-columns** | String | 否 | none | 分库复合分片策略：多分片使用的列名，以逗号分隔 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.algorithm-class-name** | String | 否 | none | 分库复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.inline.algorithm-expression** | String | 否 | none | 分库行表达式分片策略：需符合Groovy语法 |
+| **default-data-source-name** | String | 是 |  | 默认数据源，未配置分片规则的表将通过默认数据源定位 |
+| **datasource.names** | String | 是 |  | 使用的数据源名称，多个数据源用英文逗号分隔 |
+| **sharding.default-key-generator.type** | String | 是 |  | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE、ZK_BASED_SNOWFLAKE、LEAF_SEGMENT和LEAF_SNOWFLAKE |
+| **sharding.default-key-generator.column** | String | 是 |  | 自增列名称 |
+| **sharding.default-key-generator.props** | Properties | 是 |  | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性<br/>3. 使用LEAF_SEGMENT算法，参看 [9. 基于LEAF的分布式主键配置](#_9-基于LEAF的分布式主键配置)<br/>4. 使用LEAF_SNOWFLAKE算法，参看 [9. 基于LEAF的分布式主键配置](#_9-基于LEAF的分布式主键配置) |
+| **sharding.binding-tables** | List | 否 |  | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.actual-data-nodes** | String | 否 |  | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.sharding-column** | String | 否 |  | 分表标准分片策略：单分片使用的列名 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.precise-algorithm-class-name** | String | 否 |  | 分表标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.range-algorithm-class-name** | String | 否 |  | 分表标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.sharding-columns** | String | 否 |  | 分表复合分片策略：多分片使用的列名，以逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.algorithm-class-name** | String | 否 |  | 分表复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.inline.algorithm-expression** | String | 否 |  | 分表行表达式分片策略：需符合Groovy语法 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.sharding-column** | String | 否 |  | 分库标准分片策略：单分片使用的列名 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.precise-algorithm-class-name** | String | 否 |  | 分库标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.range-algorithm-class-name** | String | 否 |  | 分库标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.sharding-columns** | String | 否 |  | 分库复合分片策略：多分片使用的列名，以逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.algorithm-class-name** | String | 否 |  | 分库复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.inline.algorithm-expression** | String | 否 |  | 分库行表达式分片策略：需符合Groovy语法 |
 
 
 
@@ -2696,28 +2704,28 @@ spring:
 | 属性 | 数据类型 | 是否必填 | 默认值 | 描述 |
 | :--- | :--- | :--- | :--- | :--- |
 | **enabled** | Boolean | 否 | true | 是否启用组件 |
-| **master-slave-rules.&lt;db-name&gt;.master-data-source-name** | String | 是 | none | 读写分离规则配置，分库名为`db-name`的主库数据源名称 |
-| **master-slave-rules.&lt;db-name&gt;.slave-data-source-names** | String | 是 | none | 读写分离规则配置，分库名为`db-name`的从库数据源名称列表，多个数据源用英文逗号分隔 |
+| **master-slave-rules.&lt;db-name&gt;.master-data-source-name** | String | 是 |  | 读写分离规则配置，分库名为`db-name`的主库数据源名称 |
+| **master-slave-rules.&lt;db-name&gt;.slave-data-source-names** | String | 是 |  | 读写分离规则配置，分库名为`db-name`的从库数据源名称列表，多个数据源用英文逗号分隔 |
 | **master-slave-rules.&lt;db-name&gt;.load-balance-algorithm-type** | String | 否 | ROUND_ROBIN | 从库负载均衡算法(需实现MasterSlaveLoadBalanceAlgorithm接口) |
-| **default-data-source-name** | String | 是 | none | 默认数据源，未配置分片规则的表将通过默认数据源定位 |
-| **datasource.names** | String | 是 | none | 使用的数据源名称，多个数据源用英文逗号分隔 |
-| **sharding.default-key-generator.type** | String | 是 | none | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE和ZK_BASED_SNOWFLAKE |
-| **sharding.default-key-generator.column** | String | 是 | none | 自增列名称 |
-| **sharding.default-key-generator.props** | Properties | 是 | none | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性 |
-| **sharding.binding-tables** | List | 否 | none | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
-| **sharding.tables.&lt;logic-table-name&gt;.actual-data-nodes** | String | 否 | none | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.sharding-column** | String | 否 | none | 分表标准分片策略：单分片使用的列名 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分表标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分表标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.sharding-columns** | String | 否 | none | 分表复合分片策略：多分片使用的列名，以逗号分隔 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.algorithm-class-name** | String | 否 | none | 分表复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.inline.algorithm-expression** | String | 否 | none | 分表行表达式分片策略：需符合Groovy语法 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.sharding-column** | String | 否 | none | 分库标准分片策略：单分片使用的列名 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.precise-algorithm-class-name** | String | 否 | none | 分库标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.range-algorithm-class-name** | String | 否 | none | 分库标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.sharding-columns** | String | 否 | none | 分库复合分片策略：多分片使用的列名，以逗号分隔 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.algorithm-class-name** | String | 否 | none | 分库复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
-| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.inline.algorithm-expression** | String | 否 | none | 分库行表达式分片策略：需符合Groovy语法 |
+| **default-data-source-name** | String | 是 |  | 默认数据源，未配置分片规则的表将通过默认数据源定位 |
+| **datasource.names** | String | 是 |  | 使用的数据源名称，多个数据源用英文逗号分隔 |
+| **sharding.default-key-generator.type** | String | 是 |  | 自增列值生成器类型，可自定义或选择内置类型：UUID、SNOWFLAKE、ZK_BASED_SNOWFLAKE、LEAF_SEGMENT和LEAF_SNOWFLAKE |
+| **sharding.default-key-generator.column** | String | 是 |  | 自增列名称 |
+| **sharding.default-key-generator.props** | Properties | 是 |  | 属性配置<br/>1. 使用SNOWFLAKE算法，需要配置`worker.id`与`max.tolerate.time.difference.milliseconds`属性<br/>2. 使用ZK_BASED_SNOWFLAKE算法，需要配置`connect.string`、`prefix.path`与`max.tolerate.time.difference.milliseconds`属性<br/>3. 使用LEAF_SEGMENT算法，参看 [9. 基于LEAF的分布式主键配置](#_9-基于LEAF的分布式主键配置)<br/>4. 使用LEAF_SNOWFLAKE算法，参看 [9. 基于LEAF的分布式主键配置](#_9-基于LEAF的分布式主键配置) |
+| **sharding.binding-tables** | List | 否 |  | 绑定表列表，每组绑定表的逻辑表名使用英文逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.actual-data-nodes** | String | 否 |  | 由数据源名.真实表名组成，以小数点分隔。多个表以逗号分隔，支持inline表达式 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.sharding-column** | String | 否 |  | 分表标准分片策略：单分片使用的列名 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.precise-algorithm-class-name** | String | 否 |  | 分表标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.standard.range-algorithm-class-name** | String | 否 |  | 分表标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.sharding-columns** | String | 否 |  | 分表复合分片策略：多分片使用的列名，以逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.complex.algorithm-class-name** | String | 否 |  | 分表复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.table-strategy.inline.algorithm-expression** | String | 否 |  | 分表行表达式分片策略：需符合Groovy语法 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.sharding-column** | String | 否 |  | 分库标准分片策略：单分片使用的列名 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.precise-algorithm-class-name** | String | 否 |  | 分库标准分片策略：精确分片算法，用于`=`和`IN`，实现`PreciseShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.standard.range-algorithm-class-name** | String | 否 |  | 分库标准分片策略：范围分片算法，用于`between`，实现`RangeShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.sharding-columns** | String | 否 |  | 分库复合分片策略：多分片使用的列名，以逗号分隔 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.complex.algorithm-class-name** | String | 否 |  | 分库复合分片策略：分片算法，实现`ComplexKeysShardingAlgorithm`接口 |
+| **sharding.tables.&lt;logic-table-name&gt;.database-strategy.inline.algorithm-expression** | String | 否 |  | 分库行表达式分片策略：需符合Groovy语法 |
 
 
 
@@ -3256,3 +3264,108 @@ spring:
 
 - 在`table-strategy`节点下定义`inline`行表达式分片策略节点。
 - 在`inline`行表达式分片策略节点下，可以使用Groovy表达式来快速定义算法`algorithm-expression`。
+
+
+
+## 9. 基于LEAF的分布式主键配置
+
+> 由于使用Leaf服务来生成分布式主键，会涉及一些策略和注意点，故单独开辟章节来说明
+
+### 9.1. 号段模式
+
+#### 9.1.1. 属性配置
+
+```yaml
+spring:
+	...
+  shardingsphere:
+  	...
+    sharding:
+			...
+      #逻辑表名
+      tables:
+        ts_order:
+          #分布式主键列，如果和默认策略一致可以不用设置
+          key-generator:
+            type: LEAF_SEGMENT
+            column: id
+            props:
+              biz-type: sharding-biz1
+              server: 192.168.3.24:13080,192.168.3.25:13080
+              'mono-incr.enabled': false
+              secret: zBVf5tXmHxFGApFFQ
+          ...
+        ts_order_item:
+          #分布式主键列，如果和默认策略一致可以不用设置
+          key-generator:
+            type: LEAF_SEGMENT
+            column: id
+            props:
+              biz-type: sharding-biz2
+              server: 192.168.3.24:13080,192.168.3.25:13080
+              'mono-incr.enabled': false
+              secret: zBVf5tXmHxFGApFFQ
+          ...
+```
+
+* 按上述配置样例中的业务键(`biz-type`)，需要在Leaf服务的数据库中先新增以下2条记录(其中的`step`值可以根据你缓存到Leaf服务节点的ID跨度进行设置)。
+
+  ```sql
+  insert into leaf_alloc(biz_tag, max_id, step, description) values('sharding-biz1', 1, 2000, 'Test leaf Segment Mode Get Id1');
+  insert into leaf_alloc(biz_tag, max_id, step, description) values('sharding-biz2', 1, 2000, 'Test leaf Segment Mode Get Id2')
+  ```
+
+* 在号段模式的使用中，由于存在依赖业务键(`biz-type`)来生成ID的情况。所以，需要在每张表下面去配置`key-generator`的属性来指定不同的`biz-type`（重复部分建议用变量替换），而不是使用`default-key-generator`。
+
+
+
+#### 9.1.2. 属性描述
+
+以下属性为`spring.shardingsphere.sharding.tables.<logic-table-name>.key-generator`的子节点属性
+
+
+| 属性                        | 数据类型 | 是否必填 | 默认值 | 描述                                                         |
+| :-------------------------- | :------- | :------- | :----- | :----------------------------------------------------------- |
+| **type**                    | String   | 是       |        | 自增列值生成器类型，号段模式选择 LEAF_SEGMENT                |
+| **column**                  | String   | 是       |        | 自增列名称                                                   |
+| **props.biz-type**          | String   | 是       |        | 业务键，关联Leaf服务数据表（leaf_alloc）中的一条号段记录     |
+| **props.server**            | String   | 是       |        | Leaf服务节点，多个请用英文逗号分隔。<br/> e.g.: xx:xx:xx:xx:13080,xx.xx.xx.xy:13080<br/>当单调递增模式开启后，仅取地址列表中排序第一的服务节点 |
+| **props.mono-incr.enabled** | Boolean  | 否       | false  | 是否开启单调递增模式（默认为趋势递增模式）。在开启单调递增模式后，Leaf服务节点的可用性降低 |
+| **props.secret**            | String   | 否       |        | 通信安全认证使用的secret                                     |
+
+
+
+### 9.2. SNOWFLAKE模式
+
+#### 9.2.1. 属性配置
+
+```yaml
+spring:  
+  shardingsphere:
+		...
+    sharding:
+      ...
+      default-key-generator:
+        #SNOWFLAKE/ZK_BASED_SNOWFLAKE/UUID/LEAF_SEGMENT/LEAF_SNOWFLAKE，默认SNOWFLAKE
+        type: LEAF_SNOWFLAKE
+        column: id
+        props:
+          server: 192.168.3.24:13080,192.168.3.25:13080
+          'mono-incr.enabled': false
+          secret: zBVf5tXmHxFGApFFQ
+```
+
+
+
+#### 9.2.2. 属性描述
+
+以下属性为`spring.shardingsphere.sharding.default-key-generator`的子节点属性
+
+
+| 属性                        | 数据类型 | 是否必填 | 默认值 | 描述                                                         |
+| :-------------------------- | :------- | :------- | :----- | :----------------------------------------------------------- |
+| **type**                    | String   | 是       |        | 自增列值生成器类型，SNOWFLAKE模式选择 LEAF_SNOWFLAKE         |
+| **column**                  | String   | 是       |        | 自增列名称                                                   |
+| **props.server**            | String   | 是       |        | Leaf服务节点，多个请用英文逗号分隔。<br/> e.g.: xx:xx:xx:xx:13080,xx.xx.xx.xy:13080<br/>当单调递增模式开启后，仅取地址列表中排序第一的服务节点 |
+| **props.mono-incr.enabled** | Boolean  | 否       | false  | 是否开启单调递增模式（默认为趋势递增模式）。在开启单调递增模式后，Leaf服务节点的可用性降低 |
+| **props.secret**            | String   | 否       |        | 通信安全认证使用的secret                                     |
