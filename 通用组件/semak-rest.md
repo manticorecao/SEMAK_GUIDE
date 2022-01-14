@@ -754,6 +754,23 @@ java.lang.RuntimeException: 系统异常|4
 
 
 
+#### 2.4.5. 隐藏指定的出入站报文日志
+
+为了更灵活地对出入站报文进行筛选，组件提供了相关的策略来**隐藏**出入站报文。在应用的`application.yaml`配置文件中，添加以下内容：
+
+```yaml
+spring:
+  http:
+    boundlog:
+      excluded-prefixes: /actuator
+      excluded-suffixes: .html
+```
+
+* `spring.http.boundlog.excluded-prefixes`：需要排除日志记录的 **Request URI** 前缀列表
+* `spring.http.boundlog.excluded-suffixes`：需要排除日志记录的 **Request URI** 后缀列表（忽略请求参数）
+
+
+
 ### 2.5. 跨域处理
 
 为了处理跨域问题， `semak-rest` 组件默认支持对跨域的配置。
