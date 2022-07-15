@@ -1,6 +1,6 @@
 # semak-sharding-jdbc
 
-`semak-sharding-jdbc`组件是一个基于`Apache ShardingShpere`项目开发的JDBC层的扩展与增强类库。 它使用客户端直连数据库，无需额外部署和依赖，可理解为增强版的JDBC驱动，完全兼容JDBC和各种ORM框架。其特性主要包括：
+`semak-sharding-jdbc`组件是一个基于`Apache ShardingSphere`项目开发的JDBC层的扩展与增强类库。 它使用客户端直连数据库，无需额外部署和依赖，可理解为增强版的JDBC驱动，完全兼容JDBC和各种ORM框架。其特性主要包括：
 
 
 1. 支持读写分离功能。
