@@ -23,7 +23,7 @@
 ```xml
 <dependency>
    <groupId>com.github.semak.commons</groupId>
-   <artifactId>semak-commons-vfs-boot-starter</artifactId>
+   <artifactId>semak-commons-vfs-spring-boot-starter</artifactId>
    <version>最新RELEASE版本</version>
 </dependency>
 ```
