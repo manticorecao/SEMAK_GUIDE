@@ -832,7 +832,7 @@ spring:
 ##### 3.1.1.1. 启用注解
 
 
-新建一个 `FeignScannerConfiguration` 类如下，**此类所在包及子包****必须要涵盖将要被OpenFeign代理的Facade接口**，且可以被应用的**ComponentScan**扫描到。
+新建一个 `FeignScannerConfiguration` 类如下，**此类所在包及子包**必须要涵盖将要被OpenFeign代理的Facade接口，且可以被应用的**ComponentScan**扫描到。
 ```java
 @Configuration
 @EnableFeignClients(basePackageClasses = FeignScannerConfiguration.class)
