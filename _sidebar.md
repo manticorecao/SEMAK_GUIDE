@@ -22,6 +22,7 @@
   * [semak-session](/通用组件/semak-session.md)
   * [semak-guardian](/通用组件/semak-guardian.md)
   * [semak-fastdfs](/通用组件/semak-fastdfs.md)
+  * [semak-oss](/通用组件/semak-oss.md)
   * [semak-biz-chain](/通用组件/semak-biz-chain.md)
   * [semak-tsdb-tdengine](/通用组件/semak-tsdb-tdengine.md)
   
