@@ -12,6 +12,7 @@
   * [semak-commons-vfs](/通用组件/semak-commons-vfs.md)
   * [semak-hikaricp](/通用组件/semak-hikaricp.md)
   * [semak-druid](/通用组件/semak-druid.md)
+  * [semak-mqtt](/通用组件/semak-mqtt.md)
   * [semak-mybatis](/通用组件/semak-mybatis.md)
   * [semak-sharding-jdbc](/通用组件/semak-sharding-jdbc.md)
   * [semak-redis](/通用组件/semak-redis.md)
