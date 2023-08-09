@@ -134,7 +134,7 @@ public class MqttClientPub {
 
 这里使用了`com.github.semak.mqtt.MqttClientTemplate`进行消息的发布动作。执行`publish`方法后，我们可以看到Broker端收到的报文。
 
-<img src=".assets/image-20230809103032822.png" alt="image-20230809103032822" style="zoom:50%;" />
+![image-20230809103032822](.assets/image-20230809103032822.png)
 
 
 
